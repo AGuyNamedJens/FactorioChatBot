@@ -27,9 +27,14 @@ Full Example (including server params):
 ```/opt/factorio/bin/64/factorio --start-server /opt/factorio/saves/map.zip --server-settings /opt/factorio/data/server-settings.json --rcon-port 8080 --rcon-password password --console-log /opt/factorio/Factorio-server.log```
 
 # Dependencies
-Install or update NodeJS https://nodejs.org/en/ (Version 12 or higher)
+Install or update NodeJS on Windows: [NodeJS Installer](https://nodejs.org/en/) (Version 12 or higher)
 
-To verify node is installed open an elevated cmd prompt and do "node -v" 
+Install or update NodeJS on Linux by running these 2 commands:
+
+`curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -`
+`sudo apt -y install nodejs`
+
+To verify node is installed run "node -v" in a cmd prompt.
 the node version should be returned
 
 Navigate in the cmd prompt to the folder you have the Factorio Chat Bot at.
@@ -61,8 +66,33 @@ Run the following command within that directory to install the required packages
 # Running the bot
 --To run from console do the following in the dir of the bot-- 
 
-node FactorioChatBot.js
+`node .` or `node FactorioChatBot.js`
 
 --To run as a service--
 
-Follow the guide to install and set up [PM2](https://pm2.keymetrics.io/docs/usage/quick-start/)
+Follow the guide below or press the link on installing and setting up [PM2](https://pm2.keymetrics.io/docs/usage/quick-start/)
+
+Run the following command as root to install pm2 globally:
+
+`npm install pm2@latest -g`
+
+After pm2 has been installed, you should be able to start the bot by running the following command in the dir of the bot:
+
+`pm2 start index.js --name factoriochatbot` (You can change the name)
+
+To manage the newly created process, these commands exist:
+
+`pm2 restart app_name`
+`pm2 reload app_name`
+`pm2 stop app_name`
+`pm2 delete app_name`
+
+For listing all applications:
+
+`pm2 [list|ls|status]`
+
+![Image](https://i.imgur.com/LmRD3FN.png)
+
+There are also logs, which you can access by running:
+
+`pm2 logs app_name` and `pm2 logs app_name --lines 200` to dig into older logs.
