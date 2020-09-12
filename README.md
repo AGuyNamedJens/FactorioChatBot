@@ -32,6 +32,7 @@ Install or update NodeJS on Windows: [NodeJS Installer](https://nodejs.org/en/) 
 Install or update NodeJS on Linux by running these 2 commands:
 
 `curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -`
+
 `sudo apt -y install nodejs`
 
 To verify node is installed run "node -v" in a cmd prompt.
@@ -83,8 +84,11 @@ After pm2 has been installed, you should be able to start the bot by running the
 To manage the newly created process, these commands exist:
 
 `pm2 restart app_name`
+
 `pm2 reload app_name`
+
 `pm2 stop app_name`
+
 `pm2 delete app_name`
 
 For listing all applications:
