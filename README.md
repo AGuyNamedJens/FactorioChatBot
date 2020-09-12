@@ -34,13 +34,10 @@ the node version should be returned
 
 Navigate in the cmd prompt to the folder you have the Factorio Chat Bot at.
 
-Run the following commands within that directory
+Run the following command within that directory to install the required packages.
 
-`npm install discord.js --save`
+`npm install`
 
-`npm install chokidar --save`
-
-`npm isntall rcon --save`
 
 # Configuration
     
