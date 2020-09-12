@@ -65,6 +65,8 @@ Run the following command within that directory to install the required packages
 
 `npm install`
 
+Continue to [Configuration](https://github.com/AGuyNamedJens/FactorioChatBot#Configuration)
+
 ### Manual download and upload
 
 Press the green button at the top of the page and select `Download ZIP`.
