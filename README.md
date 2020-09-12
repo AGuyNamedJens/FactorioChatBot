@@ -5,12 +5,27 @@ This bot does **not**:
 - Disable Achievements unless specified.
 - Require mods to run.
 
-The guide below is made for factorio servers on Linux.
+The guide below is made for factorio servers on Linux. Windows guide might be added on a later date.
 
 # Requirements
-  1. A factorio server with RCON enabled
-  2. A factorio server with Logging enabled
-  3. Ability to host the bridge locally on the same machine as the game server.
+  1. A Discord Bot
+  2. A factorio server with RCON enabled
+  3. A factorio server with Logging enabled
+  4. Ability to host the bridge locally on the same machine as the game server.
+
+# Setting up a Discord Application
+
+Head over to [Discord's developer page](https://discord.com/developers/applications) to create a new application
+
+Open [this URL](https://discord.com/oauth2/authorize?client_id=CLIENT_ID&permissions=-1&scope=bot) and replace `CLIENT_ID` in the URL with the `Client ID` found on the application's `General Information` page. This should now show your bot, select your server to invite the bot there.
+
+Now, the bot should have joined the server but it's not online yet.
+
+Head back to [Discord's developer page](https://discord.com/developers/applications), select the application again and head over to the `Bot` page under the settings tab.
+Create a bot by pressing Add Bot and copy the token to somewhere for a while. You will need this token later for the bot to connect to discord.
+
+**Keep this token to yourself ONLY!**
+
 
 # Setting up RCON and Logging
 The Factorio server must have RCON and Logging enabled.
@@ -53,15 +68,17 @@ Run the following command within that directory to install the required packages
 
   set `"chatChannel": "Channel ID"` with your discord channel ID for the chat messages. ([Help](https://support.discordapp.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-))
 
-  Set `"cleanMessages": "false"` to true if you want to have clean messages in Factorio. **WARNING: THIS WILL DISABLE ACHIEVEMENTS!**
+  set `"cleanMessages": "false"` to true if you want to have clean messages in Factorio. **WARNING: THIS WILL DISABLE ACHIEVEMENTS!**
 
-  Set `"consoleChannel": "false"` to the channel ID if you want to have a seperate channel for executing factorio commands. **WARNING: SOME MAY DISABLE ACHIEVEMENTS!**
+  set `"consoleChannel": "false"` to the channel ID if you want to have a seperate channel for executing factorio commands. **WARNING: SOME MAY DISABLE ACHIEVEMENTS!**
 
   set RconIP (Should remain 127.0.0.1 for localhost)
 
   set RconPort (Same port you set in your server launch params)
 
   set RconPassword (Same pass you set in your server launch params)
+
+  set `"token": "Bot Token"` to the bot's token as i mentioned before when creating a new application.
 
 
 # Running the bot
