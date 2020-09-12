@@ -52,7 +52,7 @@ Run the following commands within that directory
 
   Set `"cleanMessages": "false"` to true if you want to have clean messages in Factorio. **WARNING: THIS WILL DISABLE ACHIEVEMENTS!**
 
-  Set `"consoleChannel"` to the channel ID if you want to have a seperate channel for executing factorio commands. **WARNING: SOME MAY DISABLE ACHIEVEMENTS!**
+  Set `"consoleChannel": "false"` to the channel ID if you want to have a seperate channel for executing factorio commands. **WARNING: SOME MAY DISABLE ACHIEVEMENTS!**
 
   set RconIP (Should remain 127.0.0.1 for localhost)
 

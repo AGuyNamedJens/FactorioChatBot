@@ -98,7 +98,7 @@ function parseMessage(msg)
         if(msg.slice(1,index).includes("LEAVE")) bot.channels.cache.get(config.chatChannel).send(":red_circle: | " + msg.slice(index+2))
         else if(msg.slice(1,index).includes("JOIN")) bot.channels.cache.get(config.chatChannel).send(":green_circle: | " + msg.slice(index+2))
         else if(msg.slice(1,index).includes("CHAT") && !msg.includes("<server>")) bot.channels.cache.get(config.chatChannel).send(":speech_left: | " + newMsg)
-        else if(!msg.includes("<server>") && config.consoleChannel) bot.channels.cache.get(config.consoleChannel).send("? | " + msg.slice(index+1))
+        else if(!msg.includes("<server>") && config.consoleChannel !== "false") bot.channels.cache.get(config.consoleChannel).send("? | " + msg.slice(index+1))
 	}
 	
 }
