@@ -82,7 +82,7 @@ bot.on("message", (message) => {
 	else if(message.content.length > 0 && !message.author.bot && message.channel.id === config.consoleChannel);
 	{
 		// send command to the server
-		conn.send('/silent-command '+ message.content);
+		conn.send('/command '+ message.content);
 	}
 });
 
