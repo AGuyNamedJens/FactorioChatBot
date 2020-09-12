@@ -74,10 +74,15 @@ bot.on("message", (message) => {
 			conn.send('[Discord] ' + message.author.username + ': ' + message.content);
 		}
 		// send to the channel showing someone sent a message to the server
-		message.channel.send(":speech_balloon: | `"+ message.author.username+ "`: " + message.content )
+		message.channel.send(":speech_balloon: | `"+ message.author.username+ "`: " + message.content);
 
 		// delete their message
         message.delete();
+	}
+	else if(message.content.length > 0 && !message.author.bot && message.channel.id === config.consoleChannel);
+	{
+		// send command to the server
+		conn.send('/silent-command '+ message.content);
 	}
 });
 
