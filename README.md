@@ -51,9 +51,8 @@ Install or update NodeJS on Linux by running these 2 commands:
 `sudo apt -y install nodejs`
 
 To verify node is installed run `node -v` in a terminal.
-the node version should be returned
 
-Download or clone this github repo to your VPS / Computer or wherever the factorio server is hosted at
+Now, clone this github repo to your VPS.
 
 ### Cloning using the terminal
 `sudo apt install git -y` to install git
@@ -66,6 +65,18 @@ Run the following command within that directory to install the required packages
 
 `npm install`
 
+### Manual download and upload
+
+Press the green button at the top of the page and select `Download ZIP`.
+
+Unzip the ZIP file and use any SFTP file manager to upload the folder to the VPS.
+
+Go back to your terminal.
+`cd <repo name>` to navigate to the folder you have the Factorio Chat Bot uploaded at.
+
+Run the following command within that directory to install the required packages.
+
+`npm install`
 
 # Configuration
     
