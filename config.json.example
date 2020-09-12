@@ -1,0 +1,18 @@
+{
+    "logFile": "/opt/factorio/Factorio-server.log",
+
+    "chatChannel": "Channel ID",
+    "cleanMessages": "false",
+    "consoleChannel": "false",
+
+    "startupMessage": {
+        "enabled": "false",
+        "message": "Factorio Chat Bot is now Online!"
+    },
+
+    "RconIP": "127.0.0.1",
+    "RconPort": "port",
+    "RconPassword": "password",
+
+    "token": "Bot Token"
+}
