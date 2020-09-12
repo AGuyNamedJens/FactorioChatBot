@@ -102,14 +102,15 @@ Run the following command within that directory to install the required packages
 
   set `"token": "Bot Token"` to the bot's token as i mentioned before when creating a new application.
 
+# Running the bot from console
 
-# Running the bot
---To run from console do the following in the dir of the bot-- 
+This will however stop the bot as soon as you hit CTRL+C or exit the terminal.
 
-`node .` or `node FactorioChatBot.js`
+`node .` or `node FactorioChatBot.js`. 
 
---To run as a service--
+# Running the bot as a service
 
+This will keep the bot running when you exit the terminal.
 Follow the guide below or press the link on installing and setting up [PM2](https://pm2.keymetrics.io/docs/usage/quick-start/)
 
 Run the following command as root to install pm2 globally:
@@ -122,12 +123,9 @@ After pm2 has been installed, you should be able to start the bot by running the
 
 To manage the newly created process, these commands exist:
 
-`pm2 restart app_name`
-
-`pm2 reload app_name`
-
-`pm2 stop app_name`
-
+`pm2 restart app_name`,
+`pm2 reload app_name`,
+`pm2 stop app_name` and
 `pm2 delete app_name`
 
 For listing all applications:
