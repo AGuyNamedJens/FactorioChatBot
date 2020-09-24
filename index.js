@@ -65,9 +65,11 @@ bot.on("ready", () => {
 
 //when we get a message from the chat channel on discord
 bot.on("message", (message) => {
-	if(message.content.length > 0 && !message.author.bot && message.channel.id === config.chatChannel)
-	{
+	if(!message.content.length > 0) return;
+	if(message.author.bot) return;
 
+	if(message.channel.id === config.chatChannel)
+	{
 		// send to the server
 		
 		if(config.cleanMessages == "true") {
@@ -81,10 +83,12 @@ bot.on("message", (message) => {
 		// delete their message
         message.delete();
 	}
-	else if(message.content.length > 0 && !message.author.bot && message.channel.id === config.consoleChannel);
+	else if(message.channel.id === config.consoleChannel)
 	{
 		// send command to the server
-		conn.send('/ '+ message.content);
+		conn.send('/'+ message.content);
+
+		message.channel.send("COMMAND RAN | `"+ message.author.username+ "`: " + message.content);
 	}
 });
 
@@ -118,7 +122,7 @@ function readLastLine(path)
 		if (err) throw err;
 		var lines = data.trim().split('\n');
 		lastLine = lines.slice(-1)[0];
-		
+
 		if(config.logLines == "true") console.log(lastLine);
 
 		if(path == config.logFile && lastLine.length > 0)  //logFile

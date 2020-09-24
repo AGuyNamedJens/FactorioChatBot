@@ -92,7 +92,7 @@ Run the following command within that directory to install the required packages
 
   set `"cleanMessages": "false"` to true if you want to have clean messages in Factorio. **WARNING: THIS WILL DISABLE ACHIEVEMENTS!**
 
-  set `"consoleChannel": "false"` to the channel ID if you want to have a seperate channel for executing factorio commands. **WARNING: SOME MAY DISABLE ACHIEVEMENTS!**
+  set `"consoleChannel": "false"` to the channel ID if you want to have a seperate channel for executing factorio commands. This won't return any responses however.. **WARNING: SOME MAY DISABLE ACHIEVEMENTS SUCH AS USING /COMMAND!**
 
   set `"logLines": "false"` to true if you want to have every line in the log file to be logged to console, includes chat, warnings and joins/leaves **WARNING: LOG SIZE WILL INCREASE BY A LOT AFTER A WHILE (GBs)**
 
