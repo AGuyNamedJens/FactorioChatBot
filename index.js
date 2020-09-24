@@ -25,7 +25,7 @@ function RconConnect()
 		  console.log("Authenticated!");
 		  
 		  if(config.startupMessage.enabled) {
-			if(config.cleanMessages == true) {
+			if(config.cleanMessages == "true") {
 				conn.send('/silent-command game.print("[Chat System]: ' + config.startupMessage.message + '")');
 			} else {
 				conn.send('[Chat System]: ' + config.startupMessage.message);
@@ -34,10 +34,12 @@ function RconConnect()
 
 		}).on('end', function() {
 		  console.log("Socket closed! Retrying to connect..");
+
 		  //failed to connect try again
 		  RconConnect();
 		}).on('error', function() {
 		  console.log("An error occoured. Retrying to connect..");
+
 		  //failed to connect try again
 		  RconConnect();
 		});
@@ -68,7 +70,7 @@ bot.on("message", (message) => {
 
 		// send to the server
 		
-		if(config.cleanMessages == true) {
+		if(config.cleanMessages == "true") {
 			conn.send('/silent-command game.print("[Discord] ' + message.author.username + ': ' + message.content + '")');
 		} else {
 			conn.send('[Discord] ' + message.author.username + ': ' + message.content);
@@ -82,7 +84,7 @@ bot.on("message", (message) => {
 	else if(message.content.length > 0 && !message.author.bot && message.channel.id === config.consoleChannel);
 	{
 		// send command to the server
-		conn.send('/command '+ message.content);
+		conn.send('/ '+ message.content);
 	}
 });
 
@@ -116,7 +118,9 @@ function readLastLine(path)
 		if (err) throw err;
 		var lines = data.trim().split('\n');
 		lastLine = lines.slice(-1)[0];
-		console.log(lastLine);
+		
+		if(config.logLines == "true") console.log(lastLine);
+
 		if(path == config.logFile && lastLine.length > 0)  //logFile
 		{
 			//pasrs name and message
@@ -126,14 +130,3 @@ function readLastLine(path)
 		
 	
 }
-
-
-
-
-
-
-
-
-
-
-

@@ -94,6 +94,8 @@ Run the following command within that directory to install the required packages
 
   set `"consoleChannel": "false"` to the channel ID if you want to have a seperate channel for executing factorio commands. **WARNING: SOME MAY DISABLE ACHIEVEMENTS!**
 
+  set `"logLines": "false"` to true if you want to have every line in the log file to be logged to console, includes chat, warnings and joins/leaves **WARNING: LOG SIZE WILL INCREASE BY A LOT AFTER A WHILE (GBs)**
+
   set RconIP (Should remain 127.0.0.1 for localhost)
 
   set RconPort (Same port you set in your server launch params)

@@ -5,6 +5,8 @@
     "cleanMessages": "false",
     "consoleChannel": "false",
 
+    "logLines": "false",
+
     "startupMessage": {
         "enabled": "false",
         "message": "Factorio Chat Bot is now Online!"
