@@ -1,5 +1,6 @@
 # Factorio Chat Bot
 Two-Directional chat bot connecting Discord and Factorio chats together, written in nodejs.
+[Examples](https://github.com/AGuyNamedJens/FactorioChatBot/blob/master/EXAMPLES.md)
 
 This bot does **not**:
 - Disable Achievements unless specified.
