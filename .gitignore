@@ -27,3 +27,6 @@ jspm_packages/
 # config files
 
 config.json
+
+# Release files
+factorio-bot-js.*
