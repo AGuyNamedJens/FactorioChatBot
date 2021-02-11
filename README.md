@@ -91,11 +91,11 @@ Run the following command within that directory to install the required packages
 
   set `"chatChannel": "Channel ID"` with your discord channel ID for the chat messages. ([Help](https://support.discordapp.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-))
 
-  set `"cleanMessages": "false"` to true if you want to have clean messages in Factorio. **WARNING: THIS WILL DISABLE ACHIEVEMENTS!**
+  set `"cleanMessages": false` to true if you want to have clean messages in Factorio. **WARNING: THIS WILL DISABLE ACHIEVEMENTS!**
 
-  set `"consoleChannel": "false"` to the channel ID if you want to have a seperate channel for executing factorio commands. This won't return any responses however.. **WARNING: SOME MAY DISABLE ACHIEVEMENTS SUCH AS USING /COMMAND!**
+  set `"consoleChannel": false` to the channel ID if you want to have a seperate channel for executing factorio commands. This won't return any responses however.. **WARNING: SOME MAY DISABLE ACHIEVEMENTS SUCH AS USING /COMMAND!**
 
-  set `"logLines": "false"` to true if you want to have every line in the log file to be logged to console, includes chat, warnings and joins/leaves **WARNING: LOG SIZE WILL INCREASE BY A LOT AFTER A WHILE (GBs)**
+  set `"logLines": false` to true if you want to have every line in the log file to be logged to console, includes chat, warnings and joins/leaves **WARNING: LOG SIZE WILL INCREASE BY A LOT AFTER A WHILE (GBs)**
 
   set RconIP (Should remain 127.0.0.1 for localhost)
 

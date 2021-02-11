@@ -2,13 +2,13 @@
     "logFile": "/opt/factorio/Factorio-server.log",
 
     "chatChannel": "Channel ID",
-    "cleanMessages": "false",
-    "consoleChannel": "false",
+    "cleanMessages": false,
+    "consoleChannel": false,
 
-    "logLines": "false",
+    "logLines": false,
 
     "startupMessage": {
-        "enabled": "false",
+        "enabled": false,
         "message": "Factorio Chat Bot is now Online!"
     },
 
