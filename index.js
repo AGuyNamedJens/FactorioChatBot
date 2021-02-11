@@ -91,7 +91,7 @@ bot.on("message", (message) => {
 
 	if(message.channel.id === config.chatChannel) {
 		// send to the server
-		if(config.cleanMessages == "true") {
+		if(config.cleanMessages == true) {
 			rcon.send('/silent-command game.print("[color=#7289DA] [Discord] ' + message.author.username + ': ' + message.content + '[/color]")');
 		} else {
 			rcon.send('[Discord] ' + message.author.username + ': ' + message.content);
@@ -155,7 +155,7 @@ function readLastLine(path)
 		lastLine = lines.slice(-1)[0];
 
 		// I should really optimize or completely remove this line
-		if(config.logLines == "true") console.log(lastLine);
+		if(config.logLines == true) console.log(lastLine);
 
 		if(path == config.logFile && lastLine.length > 0) {
 			// Parse name and message and send it
