@@ -155,7 +155,7 @@ function readLastLine(path)
 		lastLine = lines.slice(-1)[0];
 
 		// I should really optimize or completely remove this line
-		if(config.logLines = true) console.log(lastLine);
+		if(config.logLines == true) console.log(lastLine);
 
 		if(path == config.logFile && lastLine.length > 0) {
 			// Parse name and message and send it
