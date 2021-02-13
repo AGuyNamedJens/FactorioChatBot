@@ -1,6 +1,7 @@
 {
     "logFile": "/opt/factorio/Factorio-server.log",
 
+    "prefix": "?",
     "chatChannel": "Channel ID",
     "cleanMessages": false,
     "consoleChannel": false,
