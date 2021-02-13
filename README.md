@@ -53,9 +53,23 @@ Install or update NodeJS on Linux by running these 2 commands:
 
 To verify node is installed run `node -v` in a terminal.
 
-Now, clone this github repo to your VPS.
+Now, download and unzip the newest release to your VPS. Or clone the repo.
 
-### Cloning using the terminal
+
+### Downloading the newest release
+
+Grab the newest stable release FactorioChatBot.zip at [the Releases](https://github.com/AGuyNamedJens/FactorioChatBot/releases)
+
+Unzip the ZIP file and use any SFTP file manager to upload the folder to the VPS.
+
+Go back to your terminal.
+`cd <repo name>` to navigate to the folder you have the Factorio Chat Bot uploaded at.
+
+Run the following command within that directory to install the required packages.
+
+`npm install`
+
+### Cloning the repo using the terminal
 `sudo apt install git -y` to install git
 
 Run `git clone https://github.com/AGuyNamedJens/FactorioChatBot` once you're sure you're in the right location (Remember which folder is shown as repo name: `Cloning into <repo name>`)
@@ -68,19 +82,6 @@ Run the following command within that directory to install the required packages
 
 Continue to [Configuration](https://github.com/AGuyNamedJens/FactorioChatBot#Configuration)
 
-### Manual download and upload
-
-Press the green button at the top of the page and select `Download ZIP`.
-
-Unzip the ZIP file and use any SFTP file manager to upload the folder to the VPS.
-
-Go back to your terminal.
-`cd <repo name>` to navigate to the folder you have the Factorio Chat Bot uploaded at.
-
-Run the following command within that directory to install the required packages.
-
-`npm install`
-
 # Configuration
     
   Rename `config.json.example` to `config.json` by using `mv config.json.example config.json`
@@ -88,6 +89,8 @@ Run the following command within that directory to install the required packages
   Open this file in either the terminal (`nano config.json`, `vim config.json` or any other terminal editors) or via any SFTP file manager.
 
   Set `"logFile": "file"` to the path you set earlier. 
+
+  set `"prefix": "?"` to a prefix of your choice. This is used for discord commands.
 
   set `"chatChannel": "Channel ID"` with your discord channel ID for the chat messages. ([Help](https://support.discordapp.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-))
 
