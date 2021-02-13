@@ -8,10 +8,6 @@ var config = require("./config.json");
 
 const bot = new Discord.Client();
 
-fs.writeFile(config.logFile, "", function () {
-	console.log("Cleared previous chat log");
-});
-
 bot.login(config.token);
 
 
@@ -42,6 +38,9 @@ function RconConnect()
 	// Authenticated, which means the authentication is successful and the system is online
     rcon.on("authenticated", () => {
 		console.log(`Authenticated!`)
+
+		clearLogFile();
+
 		if(config.startupMessage.enabled) {
 			if(config.cleanMessages == true) {
 				rcon.send('/silent-command game.print("[Chat System]: ' + config.startupMessage.message + '")');
@@ -85,7 +84,7 @@ bot.on("ready", () => {
 * Discord message event
 */
 
-bot.on("message", (message) => {
+bot.on("message", async(message) => {
 	if(!message.content.length > 0) return;
 	if(message.author.bot) return;
 
@@ -100,16 +99,40 @@ bot.on("message", (message) => {
 		message.channel.send(":speech_balloon: | `"+ message.author.username+ "`: " + message.content);
 		message.delete();
 		
-		} else if(message.channel.id === config.consoleChannel) {
+	} else if(message.channel.id === config.consoleChannel) {
 		// send command to the server
 		rcon.send('/'+ message.content);
 		// send to the channel showing someone sent a command to the server
 		message.channel.send("COMMAND RAN | `"+ message.author.username+ "`: " + message.content);
+	} else if(message.content.startsWith(`${config.prefix}online`)) {
+		// Command with the prefix defined in config.js to show online players
+		const players = await getOnlinePlayers();
+		// Send the message to the Discord channel
+		message.channel.send(`There are currently ${players.length} player(s) online${players.length > 0 ? ` with the name(s):\n- \`${players.join("`\n- `")}\`` : "."}`)
 	}
 });
 
+// Get online players
+
+async function getOnlinePlayers() {
+	// Run the command "/players online"
+	var res = await rconCommand("/p o");
+	// Turn result into an array, remove the first and last array element
+	res = res.split("\n").slice(1, -1);
+	// create a new array
+	var onlinePlayers = [];
+
+	res.forEach(player => {
+		// remove white spaces at the start and remove (online) from the end
+		player = player.trim().split(" (online)")[0];
+		// push result to a new array
+		onlinePlayers.push(player);
+	})
+	return onlinePlayers;
+}
+
 /*
-* Chat function
+* Chat function to parse the messages
 */
 
 function parseMessage(msg)
@@ -122,7 +145,7 @@ function parseMessage(msg)
 		if(msg.slice(1,index).includes("LEAVE")) {
 			// Send leave message to the Discord channel
 			bot.channels.cache.get(config.chatChannel).send(":red_circle: | " + msg.slice(index+2))
-			//Send leave message to the server
+			// Send leave message to the server
 			if(config.cleanMessages == true) rcon.send('/silent-command game.print("[color=red]'+ msg.slice(index+2) + '[/color]")');
 			else rcon.send('[color=red]' + msg.slice(index+2) + '[/color]');
 		} else if(msg.slice(1,index).includes("JOIN")){
@@ -130,7 +153,7 @@ function parseMessage(msg)
 			bot.channels.cache.get(config.chatChannel).send(":green_circle: | " + msg.slice(index+2))
 			// Send join message to the server
 			if(config.cleanMessages == true) rcon.send('/silent-command game.print("[color=green]'+ msg.slice(index+2) + '[/color]")');
-			else rcon.send('[color=red]' + msg.slice(index+2) + '[/color]');
+			else rcon.send('[color=green]' + msg.slice(index+2) + '[/color]');
 		} else if(msg.slice(1,index).includes("CHAT") && !msg.includes("<server>")) {
 			// Send incoming chat from the server to the Discord channel
 			bot.channels.cache.get(config.chatChannel).send(":speech_left: | " + newMsg)
@@ -166,28 +189,24 @@ function readLastLine(path)
 	
 }
 
-/*
-* Will be used as listing the online players in the future
-* DISABLES ACHIEVEMENTS
+// Clear the logFile to prevent massive disk usage
+function clearLogFile() {
+	fs.writeFile(config.logFile, "", function () {
+		console.log("Cleared previous chat log");
+	});
+
+}
+
+/*	rconCommand function
+*	Returns an array of 2, first being the command response, second being the error (if there is one, otherwise it's empty)
 */
-
-/*async function onlinePlayers() {
-	
-    rcon.on("connect", () => console.log(`Connected`));
-    rcon.on("error", (err) => {
-		console.log(`Error: ${err}`);
-    });
-    rcon.on("authenticated", () => console.log(`Authenticated`));
-	rcon.on("end", () => console.log(`End`));
-	
-	await rcon.connect();
-
-	const res = await rcon.send(`/sc 
-	local players = {}
-	local max for _, player in pairs(game.connected_players) do 
-	players[#players+1] = player.name
-	end 
-	rcon.print(unpack(players))
-	`)
-	rcon.end();
-}*/
+async function rconCommand(command) {
+    if (!command.startsWith("/")) command = `/${command}`;
+    try {
+        let resp = await rcon.send(command);
+        if (typeof resp == "string" && resp.length) return resp;
+        else throw new Error("No length");
+    } catch (error) {
+        throw Error(`RCON Error --- Details --- \nNAME: ${error.name} \nDESC: ${error.description}`);
+    }
+}
