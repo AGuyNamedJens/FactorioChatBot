@@ -1,6 +1,6 @@
 {
   "name": "factorio-bot",
-  "version": "0.0.8",
+  "version": "0.0.8-beta",
   "description": "Jens's factorio bot connecting discord and factorio by using RCON",
   "main": "index.js",
   "scripts": {
