@@ -44,11 +44,11 @@ Full Example (including server params):
 ```/opt/factorio/bin/64/factorio --start-server /opt/factorio/saves/map.zip --server-settings /opt/factorio/data/server-settings.json --rcon-port 8080 --rcon-password password --console-log /opt/factorio/Factorio-server.log```
 
 # Dependencies
-Install or update NodeJS on Windows: [NodeJS Installer](https://nodejs.org/en/) (Version 12 or higher)
+Install or update NodeJS on Windows: [NodeJS Installer](https://nodejs.org/en/) (Version **14** or higher)
 
 Install or update NodeJS on Linux by running these 2 commands:
 
-`curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -`
+`curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -`
 
 `sudo apt -y install nodejs`
 
@@ -84,7 +84,8 @@ Run the following command within that directory to install the required packages
 Continue to [Configuration](https://github.com/AGuyNamedJens/FactorioChatBot#Configuration)
 
 # Configuration
-See [Configuration](https://github.com/AGuyNamedJens/FactorioChatBot/Configuration)
+
+See [CONFIG.MD](https://github.com/AGuyNamedJens/FactorioChatBot/blob/master/CONFIG.md) for configuring the bot!
 # Running the bot from console
 
 This will however stop the bot as soon as you hit CTRL+C or exit the terminal.
