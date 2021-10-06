@@ -12,5 +12,9 @@
     "chokidar": "^3.4.2",
     "discord.js": "^13.2.0",
     "rcon-client": "^4.2.3"
+  },
+  "engines": {
+    "node": ">=14.18.0",
+    "npm": ">=7.24.1"
   }
 }
