@@ -155,7 +155,7 @@ function parseMessage(msg) {
 		} else if (msg.slice(1, index).includes("CHAT") && !msg.includes("<server>")) {
 			// Send incoming chat from the server to the Discord channel
 			bot.channels.cache.get(config.chatChannel).send(":speech_left: | " + newMsg)
-		} else if (!msg.includes("<server>") && config.consoleChannel !== "false") {
+		} else if (!msg.includes("<server>") && config.consoleChannel !== false) {
 			// Send incoming message from the server, which has no category or user to the Discord console channel
 			bot.channels.cache.get(config.consoleChannel).send("? | " + msg.slice(index + 1))
 		}
