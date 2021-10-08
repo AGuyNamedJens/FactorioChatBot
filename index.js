@@ -83,7 +83,7 @@ bot.on("ready", () => {
 * Discord message event
 */
 
-bot.on("message", async (message) => {
+bot.on("messageCreate", async (message) => {
 	if (!message.content.length > 0) return;
 	if (message.author.bot) return;
 
