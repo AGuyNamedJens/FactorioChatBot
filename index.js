@@ -6,7 +6,7 @@ var { Rcon } = require("rcon-client");
 
 var config = require("./config.json");
 
-const bot = new Discord.Client({ ws: { intents: 512 } });
+const bot = new Discord.Client({ ws: { intents: 513 } });
 
 bot.login(config.token);
 
