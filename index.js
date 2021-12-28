@@ -6,7 +6,7 @@ var { Rcon } = require("rcon-client");
 
 var config = require("./config.json");
 
-const bot = new Discord.Client({ intents: ['GUILD_MESSAGES', 'GUILDS'] });
+const bot = new Discord.Client({ intents: ['GUILD_MESSAGES', 'GUILDS'], allowedMentions: { users: [], roles: [] } });
 
 bot.login(config.token);
 
