@@ -1,15 +1,94 @@
-import Discord from 'discord.js';
+import Discord, { Client, Intents } from 'discord.js';
 import fs from "fs";
 import chokidar from "chokidar";
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { REST } from '@discordjs/rest';
+import { APIMessage, Routes } from 'discord-api-types/v9';
 
 import { Rcon } from "rcon-client";
 
-var config = require("./config.json");
+var config: Config = require("./config.json");
 
-const bot = new Discord.Client({ intents: ['GUILD_MESSAGES', 'GUILDS'], allowedMentions: { users: [], roles: [] } });
+const rest = new REST({version: '9'}).setToken(config.token);
+
+const bot = new Discord.Client({ intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS], allowedMentions: { users: [], roles: [] } });
+
+const Commands: Discord.Collection<string, Command> = new Discord.Collection();
 
 bot.login(config.token);
 
+interface Config {
+	/**
+	 * The file that the server is set to log to, as defined with the `--console-log` flag or config option.
+	 */
+	logFile: string;
+
+	/**
+	 * The channel the bot is set to send and receive messages from.
+	 */
+	chatChannel: string;
+
+	/**
+	 * Whether or not to clean log file messages upon startup.
+	 */
+	cleanMessages: boolean;
+
+	/**
+	 * Whether or not members with administrator permissions on the Discord server may run commands in-game via `?command`.
+	 */
+	adminsCanRunCommands: boolean;
+
+	/**
+	 * Whether or not to send miscellaneous server messages to the chat channel.
+	 */
+	sendServerMessages: boolean;
+
+	/**
+	 * Whether or not to log all lines read by the bot from the log file to the console.
+	 */
+	logLines: boolean;
+
+	startupMessage: {
+		/**
+		 * Whether or not the startup message is enabled.
+		 */
+		enabled: boolean;
+
+		/**
+		 * The contents of the startup message, to be sent to the Factorio server.
+		 */
+		message: string;
+	}
+
+	/**
+	 * The RCON IP. Most of the time, this should be set to the localhost, `127.0.0.1`, unless connecting to a remote Factorio server.
+	 */
+	RconIP: string;
+
+	/**
+	 * The RCON port, as defined with the `--rcon-port` flag or config option. Most of the time, this should be set to `8080`, unless connecting to a remote Factorio server.
+	 */
+	RconPort: number;
+
+	/**
+	 * The RCON password, as defined with the `--rcon-password` flag or config option.
+	 */
+	RconPassword: string;
+
+	/**
+	 * The bot's token.
+	 */
+	token: string;
+}
+
+interface Command {
+    /**
+     * The command name.
+     */
+    data: Omit<SlashCommandBuilder, "addSubcommandGroup" | "addSubcommand">;
+
+    execute(interaction: Discord.CommandInteraction): void;
+}
 
 var rcon: Rcon;
 var tries = 1;
@@ -57,10 +136,9 @@ function RconConnect() {
 		rcon.end();
 	});
 
-	// In case the connection was ended, terminated or whatever else happened. Log a message and reconnect
+	// In case the connection was ended, terminated or whatever else happened. Log a message
 	rcon.on("end", () => {
-		console.log('Socket connection ended! Reconnecting...');
-		RconConnect();
+		console.log('Socket connection ended!');
 	});
 };
 
@@ -79,7 +157,64 @@ bot.on("ready", () => {
 	chokidar.watch(config.logFile, { ignored: /(^|[\/\\])\../ }).on('all', (event, path) => {
 		readLastLine(config.logFile);
 	});
+
+	Commands.set("online", {
+		data: new SlashCommandBuilder()
+			.setName('online')
+			.setDescription('Lists online players'),
+		async execute(interaction: Discord.CommandInteraction) {
+			const players = await getOnlinePlayers();
+
+			interaction.reply(`There ${players.length != 1 ? "are" : "is"} currently ${players.length} player${players.length != 1 ? "s" : ""} online${players.length > 0 ? `:\n- \`${players.join("`\n- `")}\`` : "."}`)
+		},
+	})
+	Commands.set("command", {
+		data: new SlashCommandBuilder()
+			.setName('command')
+			.setDescription('Executes a command on the Factorio server')
+			.addStringOption(option => option.setName('command').setDescription('The command to run on the server').setRequired(true)),
+		async execute(interaction: Discord.CommandInteraction) {
+			const comm = interaction.options.getString('command');
+			// send command to the server
+			rcon.send('/' + comm);
+			// send to the channel showing someone sent a command to the server
+			if (!interaction.memberPermissions.any('ADMINISTRATOR')) {
+				return interaction.reply("You do not have the required permissions to run this command.");
+			}
+			else if (!config.adminsCanRunCommands) {
+				return interaction.reply("This command is disabled per the config option.");
+			}
+			interaction.reply("COMMAND RAN | `" + interaction.user.username + "`: " + comm);
+		},
+	})
+	
+	var commands2: any[] = [];
+	Commands.forEach((command: any)=> {
+		commands2.push(command.data.toJSON())
+	})
+
+	var guildID = "";
+	bot.guilds.cache.forEach(guild => {
+		if (guild.channels.cache.has(config.chatChannel)) {
+			guildID = guild.id;
+		}
+	})
+
+	rest.put(
+		Routes.applicationGuildCommands("932401134524596256", guildID),
+		{ body: commands2 }
+	)
 });
+
+bot.on('interactionCreate', async (interaction) => {
+    if (!interaction.isCommand()) return;
+    
+    const command = Commands.get(interaction.commandName);
+
+    if (!command) return;
+
+    command.execute(interaction);
+})
 
 /*
 * Discord message event
@@ -92,25 +227,12 @@ bot.on("messageCreate", async (message) => {
 	if (message.channel.id === config.chatChannel) {
 		// send to the server
 		if (config.cleanMessages == true) {
-			rcon.send(`/silent-command game.print("[color=#7289DA][Discord] ${message.member.nickname}: ${message.content} [/color])`);
+			rcon.send(`/silent-command game.print("[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content} [/color])`);
 		}
 		else {
-			rcon.send(`[color=#7289DA][Discord] ${message.member.nickname}: ${message.content}[/color]`);
+			rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content}[/color]`);
 		}
 
-	}
-	else if (message.channel.id === config.consoleChannel && !message.content.startsWith(`${config.prefix}online`)) {
-		// send command to the server
-		rcon.send('/' + message.content);
-		// send to the channel showing someone sent a command to the server
-		message.channel.send("COMMAND RAN | `" + message.author.username + "`: " + message.content);
-	}
-	
-	if (message.content.startsWith(`${config.prefix}online`)) {
-		// Command with the prefix defined in config.js to show online players
-		const players = await getOnlinePlayers();
-		// Send the message to the Discord channel
-		message.channel.send(`There ${players.length != 1 ? "are" : "is"} currently ${players.length} player${players.length != 1 ? "s" : ""} online${players.length > 0 ? `:\n- \`${players.join("`\n- `")}\`` : "."}`);
 	}
 });
 
@@ -169,7 +291,7 @@ function parseMessage(msg: string | string[]) {
 			// Send incoming chat from the server to the Discord channel
 			(bot.channels.cache.get(config.chatChannel) as Discord.TextChannel).send(":speech_left: | " + newMsg)
 		}
-		else if (!msg.includes("<server>") && config.consoleChannel !== false) {
+		else if (!msg.includes("<server>") && config.sendServerMessages) {
 			// Send incoming message from the server, which has no category or user to the Discord console channel
 			(bot.channels.cache.get(config.chatChannel) as Discord.TextChannel).send("? | " + msg.slice(index + 1))
 		}
@@ -204,9 +326,8 @@ function readLastLine(path: fs.PathOrFileDescriptor) {
 // Clear the logFile to prevent massive disk usage
 function clearLogFile() {
 	fs.writeFile(config.logFile, "", function () {
-		console.log('Cleared previous chat log');
+		console.log('Cleared previous chat log.');
 	});
-
 }
 
 /*	rconCommand function
@@ -219,11 +340,8 @@ async function rconCommand(command: string) {
 		if (typeof resp == "string" && resp.length) {
 			return resp;
 		}
-		else {
-			throw new Error("No length");
-		}
 	}
 	catch (error: any) {
-		throw Error(`RCON Error \n--- Details --- \nNAME: ${error.name} \nDESC: ${error.description}`);
+		throw new Error(`RCON Error \n--- Details --- \nNAME: ${error.name} \nDESC: ${error.description}`);
 	}
 }
