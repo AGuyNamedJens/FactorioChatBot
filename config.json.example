@@ -16,6 +16,8 @@
     "factorioPath": "bin/x64/factorio",
     "autoCheckUpdates": false,
     "userToNotify": "User ID",
+    "checkTime": 500000,
+    "silentCheck": true,
 
     "RconIP": "127.0.0.1",
     "RconPort": "port",

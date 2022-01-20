@@ -21,6 +21,10 @@
 
   - set `"userToNotify": "User ID"` to the Discord user ID of the user in which to notify if newer Factorio packages were found.
 
+  - set `"checkTime` to the time, in milliseconds, of the delay between checking for Factorio packages. Set to -1 to only check on startup.
+
+  - set `"silentCheck": true` to false if you want the console to report whether or not newer Factorio packages were found.
+
   - set `RconIP` to the RCON IP (should normally remain localhost, or 127.0.0.1, unless connecting to a remote Factorio server).
 
   - set `RconPort` to the RCON port (should normally remain 8080, unless connecting to a remote Factorio server).

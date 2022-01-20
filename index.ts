@@ -44,6 +44,10 @@ interface Config {
 
 	userToNotify: string;
 
+	checkTime: number;
+
+	silentCheck: boolean;
+
 	RconIP: string;
 
 	RconPort: number;
@@ -119,6 +123,29 @@ function RconConnect() {
 * Bot start event
 */
 
+function updateCheck() {
+	fs.access('update_factorio.py', function (err) {
+		if (err) {
+			console.log('Auto-retrieval of Factorio package updates has been set to true, but the update script was not found. Did you forget to clone the repository?')
+			return;
+		}
+	});
+	PythonShell.run('update_factorio.py', {args:['-d', '-a', config.factorioPath]}, function (err, results: string[]) {
+		if (results == null) {
+			console.log('Error while checking for updates for the Factorio binary. Ensure the provided path in the config file is set correctly.');
+		}
+		if (results[1].includes("No updates available") && !config.silentCheck) {
+			console.log(`No updates found for provided Factorio binary (version ${results[0].slice(results[0].indexOf('version as') + 11, results[0].indexOf('from') - 1)}).`);
+		}
+		else if (results[1].includes("Dry run:")) {
+			bot.users.resolve(config.userToNotify)?.send(`Newer Factorio packages were found.\nCurrent version: \`${results[0].slice(results[0].indexOf('version as') + 11, results[0].indexOf('from') - 1)}\`\nLatest version: \`${results[results.length - 1].slice(results[results.length - 1].indexOf('to ') + 3, results[results.length - 1].length - 1)}\``);
+			if (!config.silentCheck) {
+				console.log(`Updates available for provided Factorio binary (${results[0].slice(results[0].indexOf('version as') + 11, results[0].indexOf('from') - 1)} --> ${results[results.length - 1].slice(results[results.length - 1].indexOf('to ') + 3, results[results.length - 1].length - 1)}).`);
+			}
+		}
+	})
+}
+
 bot.on("ready", () => {
 	//connect to rcon
 	RconConnect();
@@ -136,24 +163,10 @@ bot.on("ready", () => {
 	console.log('Watching log file.');
 
 	if (config.autoCheckUpdates) {
-		fs.access('update_factorio.py', function (err) {
-			if (err) {
-				console.log('Auto-retrieval of Factorio package updates has been set to true, but the update script was not found. Did you forget to clone the repository?')
-				return;
-			}
-		});
-		PythonShell.run('update_factorio.py', {args:['-d', '-a', config.factorioPath]}, function (err, results: string[]) {
-			if (results == null) {
-				console.log('Error while checking for updates for the Factorio binary. Ensure the provided path in the config file is set correctly.');
-			}
-			if (results[1].includes("No updates available")) {
-				console.log(`No updates found for provided Factorio binary (version ${results[0].slice(results[0].indexOf('version as') + 11, results[0].indexOf('from') - 1)}).`);
-			}
-			else if (results[1].includes("Dry run:")) {
-				console.log(`Updates available for provided Factorio binary (${results[0].slice(results[0].indexOf('version as') + 11, results[0].indexOf('from') - 1)} --> ${results[results.length - 1].slice(results[results.length - 1].indexOf('to ') + 3, results[results.length - 1].length - 1)}).`);
-				bot.users.resolve(config.userToNotify)?.send(`Newer Factorio packages were found.\nCurrent version: \`${results[0].slice(results[0].indexOf('version as') + 11, results[0].indexOf('from') - 1)}\`\nLatest version: \`${results[results.length - 1].slice(results[results.length - 1].indexOf('to ') + 3, results[results.length - 1].length - 1)}\``);
-			}
-		})
+		updateCheck();
+		if (config.checkTime > 0) {
+			setTimeout(updateCheck, config.checkTime);
+		}
 	}
 
 	Commands.set("online", {
