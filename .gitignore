@@ -30,3 +30,4 @@ config.json
 
 # Release files
 factorio-bot-js.*
+update_factorio.py

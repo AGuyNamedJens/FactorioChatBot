@@ -15,6 +15,12 @@
 
   - set `"logLines": false` to true if you want to have every line in the log file to be logged to console, includes chat, warnings and joins/leaves. **WARNING: LOG SIZE WILL INCREASE BY A LOT AFTER A WHILE (GBs)**
 
+  - set `factorioPath` to the absolute path of your Factorio file, including the extension.
+
+  - set `"autoCheckUpdates": false` to true if you want to have the bot check for latest Factorio packages on startup. **YOU MUST CLONE https://github.com/narc0tiq/factorio-updater AND MOVE `update_factorio.py` TO THIS DIRECTORY IN ORDER FOR THIS TO WORK**
+
+  - set `"userToNotify": "User ID"` to the Discord user ID of the user in which to notify if newer Factorio packages were found.
+
   - set `RconIP` to the RCON IP (should normally remain localhost, or 127.0.0.1, unless connecting to a remote Factorio server).
 
   - set `RconPort` to the RCON port (should normally remain 8080, unless connecting to a remote Factorio server).

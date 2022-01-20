@@ -3,7 +3,8 @@ import fs from "fs";
 import chokidar from "chokidar";
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { REST } from '@discordjs/rest';
-import { APIMessage, Routes } from 'discord-api-types/v9';
+import { Routes } from 'discord-api-types/v9';
+import { PythonShell } from 'python-shell';
 
 import { Rcon } from "rcon-client";
 
@@ -11,7 +12,7 @@ var config: Config = require("./config.json");
 
 const rest = new REST({version: '9'}).setToken(config.token);
 
-const bot = new Discord.Client({ intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS], allowedMentions: { users: [], roles: [] } });
+const bot = new Discord.Client({ intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_PRESENCES, Intents.FLAGS.GUILD_INTEGRATIONS], allowedMentions: { users: [], roles: [] } });
 
 const Commands: Discord.Collection<string, Command> = new Discord.Collection();
 
@@ -36,6 +37,12 @@ interface Config {
 
 		message: string;
 	}
+
+	factorioPath: string;
+
+	autoCheckUpdates: boolean;
+
+	userToNotify: string;
 
 	RconIP: string;
 
@@ -127,6 +134,27 @@ bot.on("ready", () => {
 	});
 
 	console.log('Watching log file.');
+
+	if (config.autoCheckUpdates) {
+		fs.access('update_factorio.py', function (err) {
+			if (err) {
+				console.log('Auto-retrieval of Factorio package updates has been set to true, but the update script was not found. Did you forget to clone the repository?')
+				return;
+			}
+		});
+		PythonShell.run('update_factorio.py', {args:['-d', '-a', config.factorioPath]}, function (err, results: string[]) {
+			if (results == null) {
+				console.log('Error while checking for updates for the Factorio binary. Ensure the provided path in the config file is set correctly.');
+			}
+			if (results[1].includes("No updates available")) {
+				console.log(`No updates found for provided Factorio binary (version ${results[0].slice(results[0].indexOf('version as') + 11, results[0].indexOf('from') - 1)}).`);
+			}
+			else if (results[1].includes("Dry run:")) {
+				console.log(`Updates available for provided Factorio binary (${results[0].slice(results[0].indexOf('version as') + 11, results[0].indexOf('from') - 1)} --> ${results[results.length - 1].slice(results[results.length - 1].indexOf('to ') + 3, results[results.length - 1].length - 1)}).`);
+				bot.users.resolve(config.userToNotify)?.send(`Newer Factorio packages were found.\nCurrent version: \`${results[0].slice(results[0].indexOf('version as') + 11, results[0].indexOf('from') - 1)}\`\nLatest version: \`${results[results.length - 1].slice(results[results.length - 1].indexOf('to ') + 3, results[results.length - 1].length - 1)}\``);
+			}
+		})
+	}
 
 	Commands.set("online", {
 		data: new SlashCommandBuilder()

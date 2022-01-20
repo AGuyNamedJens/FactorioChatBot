@@ -13,6 +13,10 @@
         "message": "Factorio Chat Bot is now Online!"
     },
 
+    "factorioPath": "bin/x64/factorio",
+    "autoCheckUpdates": false,
+    "userToNotify": "User ID",
+
     "RconIP": "127.0.0.1",
     "RconPort": "port",
     "RconPassword": "password",
