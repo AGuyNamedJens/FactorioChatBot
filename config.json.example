@@ -22,6 +22,7 @@
     "RconIP": "127.0.0.1",
     "RconPort": "port",
     "RconPassword": "password",
+    "RconTimeout": 2000,
 
     "token": "Bot Token"
 }

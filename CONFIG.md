@@ -31,4 +31,6 @@
 
   - set `RconPassword` to the RCON password as set with the --rcon-password launch flag.
 
+  - set `RconTimeout` to the timeout, in milliseconds, without a packet before the bot will raise an exception.
+
   - set `"token": "Bot Token"` to the bot's token as mentioned when creating a new application.

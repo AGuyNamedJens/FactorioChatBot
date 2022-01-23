@@ -54,6 +54,8 @@ interface Config {
 
 	RconPassword: string;
 
+	RconTimeout: number;
+
 	token: string;
 }
 
@@ -73,7 +75,7 @@ var tries = 1;
  * Connects to the server via RCON.
  */
 function RconConnect() {
-	rcon = new Rcon({ host: config.RconIP, port: config.RconPort, password: config.RconPassword, timeout: 10000 });
+	rcon = new Rcon({ host: config.RconIP, port: config.RconPort, password: config.RconPassword, timeout: config.RconTimeout });
 
 	rcon.connect().catch(error => {
 		console.error(error);
@@ -218,7 +220,7 @@ bot.on("ready", () => {
 	})
 
 	rest.put(
-		Routes.applicationGuildCommands("932401134524596256", guildID),
+		Routes.applicationGuildCommands(bot.user.id, guildID),
 		{ body: commands2 }
 	)
 });
@@ -243,10 +245,10 @@ bot.on("messageCreate", async (message) => {
 	if (message.channel.id === config.chatChannel) {
 		// send to the server
 		if (config.cleanMessages == true) {
-			rcon.send(`/silent-command game.print("[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content} [/color])`);
+			rcon.send(`/silent-command game.print("[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content} [/color])\n${message.attachments.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) : ''}`);
 		}
 		else {
-			rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content}[/color]`);
+			rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content}[/color]\n${message.attachments.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) : ''}`);
 		}
 
 	}
