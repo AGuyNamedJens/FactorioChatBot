@@ -254,10 +254,10 @@ bot.on("messageCreate", async (message) => {
 		}
 		else {
 			if (config.cleanMessages == true) {
-				rcon.send(`/silent-command game.print("[Discord] ${message.member.nickname ?? message.author.username}: ${message.attachments?.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}")`);
+				rcon.send(`/silent-command game.print("[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: [/color]${message.attachments?.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}")`);
 			}
 			else {
-				rcon.send(`[Discord] ${message.member.nickname ?? message.author.username}: ${message.attachments?.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}`);
+				rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: [/color]${message.attachments?.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}`);
 			}
 		}
 	}
