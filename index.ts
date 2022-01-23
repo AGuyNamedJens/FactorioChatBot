@@ -246,10 +246,10 @@ bot.on("messageCreate", async (message) => {
 		// send to the server
 		if (message.content.length > 0) {
 			if (config.cleanMessages == true) {
-				rcon.send(`/silent-command game.print("[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content} [/color]${message.attachments?.size > 0 ? ('\n[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}")`);
+				rcon.send(`/silent-command game.print("[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content.replace(/"/g, '\"').replace(/'/g, "\'")} [/color]${message.attachments?.size > 0 ? ('\n[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}")`);
 			}
 			else {
-				rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content}[/color]${message.attachments?.size > 0 ? ('\n[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}`);
+				rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content.replace(/"/g, '\"').replace(/'/g, "\'")}[/color]${message.attachments?.size > 0 ? ('\n[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}`);
 			}
 		}
 		else {
