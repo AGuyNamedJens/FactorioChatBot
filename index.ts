@@ -75,7 +75,7 @@ var tries = 1;
  * Connects to the server via RCON.
  */
 function RconConnect() {
-	rcon = new Rcon({ host: config.RconIP, port: config.RconPort, password: config.RconPassword, timeout: config.RconTimeout });
+	rcon = new Rcon({ host: config.RconIP, port: config.RconPort, password: config.RconPassword, timeout: config.RconTimeout > 0 ? config.RconTimeout : 2000 });
 
 	rcon.connect().catch(error => {
 		console.error(error);
@@ -245,10 +245,10 @@ bot.on("messageCreate", async (message) => {
 	if (message.channel.id === config.chatChannel) {
 		// send to the server
 		if (config.cleanMessages == true) {
-			rcon.send(`/silent-command game.print("[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content} [/color])\n${message.attachments?.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) : ''}]`);
+			rcon.send(`/silent-command game.print("[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content} [/color])\n${message.attachments?.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}`);
 		}
 		else {
-			rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content}[/color]\n${message.attachments?.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) : ''}]`);
+			rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content}[/color]\n${message.attachments?.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}`);
 		}
 
 	}
