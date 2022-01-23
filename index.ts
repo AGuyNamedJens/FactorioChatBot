@@ -109,7 +109,7 @@ function RconConnect() {
 
 	// In case any errors occur, log them to console and terminate the connection
 	rcon.on("error", (err) => {
-		console.error(`Error: ${err}`);
+		console.error(`Error Test to ensure: ${err}`);
 		rcon.end();
 	});
 
@@ -123,7 +123,7 @@ function RconConnect() {
 * Bot start event
 */
 
-function updateCheck() {
+async function updateCheck() {
 	fs.access('update_factorio.py', function (err) {
 		if (err) {
 			console.log('Auto-retrieval of Factorio package updates has been set to true, but the update script was not found. Did you forget to clone the repository?')
@@ -133,6 +133,7 @@ function updateCheck() {
 	PythonShell.run('update_factorio.py', {args:['-d', '-a', config.factorioPath]}, function (err, results: string[]) {
 		if (results == null) {
 			console.log('Error while checking for updates for the Factorio binary. Ensure the provided path in the config file is set correctly.');
+			return;
 		}
 		if (results[1].includes("No updates available") && !config.silentCheck) {
 			console.log(`No updates found for provided Factorio binary (version ${results[0].slice(results[0].indexOf('version as') + 11, results[0].indexOf('from') - 1)}).`);
@@ -143,7 +144,15 @@ function updateCheck() {
 				console.log(`Updates available for provided Factorio binary (${results[0].slice(results[0].indexOf('version as') + 11, results[0].indexOf('from') - 1)} --> ${results[results.length - 1].slice(results[results.length - 1].indexOf('to ') + 3, results[results.length - 1].length - 1)}).`);
 			}
 		}
+		console.log(results)
 	})
+}
+
+async function runUpdateCheckAsync() {
+	updateCheck();
+	if (config.checkTime > 0) {
+		setTimeout(runUpdateCheckAsync, config.checkTime);
+	}
 }
 
 bot.on("ready", () => {
@@ -163,10 +172,7 @@ bot.on("ready", () => {
 	console.log('Watching log file.');
 
 	if (config.autoCheckUpdates) {
-		updateCheck();
-		if (config.checkTime > 0) {
-			setTimeout(updateCheck, config.checkTime);
-		}
+		runUpdateCheckAsync();
 	}
 
 	Commands.set("online", {

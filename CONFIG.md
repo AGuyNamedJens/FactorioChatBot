@@ -19,7 +19,7 @@
 
   - set `"autoCheckUpdates": false` to true if you want to have the bot check for latest Factorio packages on startup. **YOU MUST CLONE https://github.com/narc0tiq/factorio-updater AND MOVE `update_factorio.py` TO THIS DIRECTORY IN ORDER FOR THIS TO WORK**
 
-  - set `"userToNotify": "User ID"` to the Discord user ID of the user in which to notify if newer Factorio packages were found.
+  - set `"userToNotify": "User ID"` to the Discord user ID of the user in which to notify if you would like the bot to notify the user when newer Factorio packages are found.
 
   - set `"checkTime` to the time, in milliseconds, of the delay between checking for Factorio packages. Set to -1 to only check on startup.
 
