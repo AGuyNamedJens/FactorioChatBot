@@ -73,7 +73,7 @@ var tries = 1;
  * Connects to the server via RCON.
  */
 function RconConnect() {
-	rcon = new Rcon({ host: config.RconIP, port: config.RconPort, password: config.RconPassword });
+	rcon = new Rcon({ host: config.RconIP, port: config.RconPort, password: config.RconPassword, timeout: 10000 });
 
 	rcon.connect().catch(error => {
 		console.error(error);
@@ -109,7 +109,7 @@ function RconConnect() {
 
 	// In case any errors occur, log them to console and terminate the connection
 	rcon.on("error", (err) => {
-		console.error(`Error Test to ensure: ${err}`);
+		console.error(`Error: ${err}`);
 		rcon.end();
 	});
 
