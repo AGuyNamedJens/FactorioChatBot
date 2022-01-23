@@ -239,18 +239,27 @@ bot.on('interactionCreate', async (interaction) => {
 * Discord message event
 */
 bot.on("messageCreate", async (message) => {
-	if (message.content.length <= 0) return;
+	if (message.content.length <= 0 && message.attachments.size <= 0) return;
 	if (message.author.bot) return;
 
 	if (message.channel.id === config.chatChannel) {
 		// send to the server
-		if (config.cleanMessages == true) {
-			rcon.send(`/silent-command game.print("[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content} [/color])\n${message.attachments?.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}`);
+		if (message.content.length > 0) {
+			if (config.cleanMessages == true) {
+				rcon.send(`/silent-command game.print("[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content} [/color])\n${message.attachments?.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}`);
+			}
+			else {
+				rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content}[/color]\n${message.attachments?.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}`);
+			}
 		}
 		else {
-			rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content}[/color]\n${message.attachments?.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}`);
+			if (config.cleanMessages == true) {
+				rcon.send(`/silent-command game.print("[Discord] ${message.member.nickname ?? message.author.username}: ${message.attachments?.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}`);
+			}
+			else {
+				rcon.send(`[Discord] ${message.member.nickname ?? message.author.username}: ${message.attachments?.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}`);
+			}
 		}
-
 	}
 });
 
