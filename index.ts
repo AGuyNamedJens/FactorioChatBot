@@ -1,4 +1,4 @@
-import Discord, { Client, Intents } from 'discord.js';
+import Discord, { Intents } from 'discord.js';
 import fs from "fs";
 import chokidar from "chokidar";
 import { SlashCommandBuilder } from '@discordjs/builders';
@@ -86,7 +86,7 @@ function RconConnect() {
 			setTimeout(function () {
 				RconConnect();
 				tries++;
-			}, 5000)
+			}, 5000);
 		}
 	});
 
@@ -128,7 +128,7 @@ function RconConnect() {
 async function updateCheck() {
 	fs.access('update_factorio.py', function (err) {
 		if (err) {
-			console.log('Auto-retrieval of Factorio package updates has been set to true, but the update script was not found. Did you forget to clone the repository?')
+			console.log('Auto-retrieval of Factorio package updates has been set to true, but the update script was not found. Did you forget to clone the repository?');
 			return;
 		}
 	});
@@ -146,15 +146,8 @@ async function updateCheck() {
 				console.log(`Updates available for provided Factorio binary (${results[0].slice(results[0].indexOf('version as') + 11, results[0].indexOf('from') - 1)} --> ${results[results.length - 1].slice(results[results.length - 1].indexOf('to ') + 3, results[results.length - 1].length - 1)}).`);
 			}
 		}
-		console.log(results)
+		console.log(results);
 	})
-}
-
-async function runUpdateCheckAsync() {
-	updateCheck();
-	if (config.checkTime > 0) {
-		setTimeout(runUpdateCheckAsync, config.checkTime);
-	}
 }
 
 bot.on("ready", () => {
@@ -174,7 +167,10 @@ bot.on("ready", () => {
 	console.log('Watching log file.');
 
 	if (config.autoCheckUpdates) {
-		runUpdateCheckAsync();
+		updateCheck();
+		if (config.checkTime > 0) {
+			setInterval(updateCheck, config.checkTime);
+		}
 	}
 
 	Commands.set("online", {
@@ -184,7 +180,7 @@ bot.on("ready", () => {
 		async execute(interaction: Discord.CommandInteraction) {
 			const players = await getOnlinePlayers();
 
-			interaction.reply(`There ${players.length != 1 ? "are" : "is"} currently ${players.length} player${players.length != 1 ? "s" : ""} online${players.length > 0 ? `:\n- \`${players.join("`\n- `")}\`` : "."}`)
+			interaction.reply(`There ${players.length != 1 ? "are" : "is"} currently ${players.length} player${players.length != 1 ? "s" : ""} online${players.length > 0 ? `:\n- \`${players.join("`\n- `")}\`` : "."}`);
 		},
 	})
 	Commands.set("command", {
@@ -209,20 +205,20 @@ bot.on("ready", () => {
 	
 	var commands2: any[] = [];
 	Commands.forEach((command: any)=> {
-		commands2.push(command.data.toJSON())
-	})
+		commands2.push(command.data.toJSON());
+	});
 
 	var guildID = "";
 	bot.guilds.cache.forEach(guild => {
 		if (guild.channels.cache.has(config.chatChannel)) {
 			guildID = guild.id;
 		}
-	})
+	});
 
 	rest.put(
 		Routes.applicationGuildCommands(bot.user.id, guildID),
 		{ body: commands2 }
-	)
+	);
 });
 
 bot.on('interactionCreate', async (interaction) => {
@@ -294,9 +290,10 @@ function parseMessage(msg: string) {
 	var newMsg = "`" + msg.slice(index + 2, indexName) + "`" + msg.slice(indexName);
 
 	if (msg.length && index > 1) {
+		var channel = (bot.channels.cache.get(config.chatChannel) as Discord.TextChannel);
 		if (msg.includes('[LEAVE]')) {
 			// Send leave message to the Discord channel
-			(bot.channels.cache.get(config.chatChannel) as Discord.TextChannel).send(":red_circle: | " + msg.slice(index + 2));
+			channel.send(":red_circle: | " + msg.slice(index + 2));
 			// Send leave message to the server
 			if (config.cleanMessages == true) {
 				rcon.send('/silent-command game.print("[color=red]' + msg.slice(index + 2) + '[/color]")');
@@ -307,7 +304,7 @@ function parseMessage(msg: string) {
 		}
 		else if (msg.includes('[JOIN]')) {
 			// Send join message to the Discord channel
-			(bot.channels.cache.get(config.chatChannel) as Discord.TextChannel).send(":green_circle: | " + msg.slice(index + 2))
+			channel.send(":green_circle: | " + msg.slice(index + 2));
 			// Send join message to the server
 			if (config.cleanMessages == true) {
 				rcon.send('/silent-command game.print("[color=green]' + msg.slice(index + 2) + '[/color]")');
@@ -318,14 +315,20 @@ function parseMessage(msg: string) {
 		}
 		else if (msg.includes("[CHAT]") && !msg.includes("[CHAT] <server>")) {
 			// Send incoming chat from the server to the Discord channel
-			(bot.channels.cache.get(config.chatChannel) as Discord.TextChannel).send(":speech_left: | " + newMsg)
+			if (msg.includes("[gps=") && msg.includes(",") && msg.includes("]")) {
+				newMsg.replaceAll("gps=", "Location: ");
+			}
+			if (msg.includes("[train-stop=") && msg.includes(",") && msg.includes("]")) {
+				newMsg.replaceAll("train-stop=", "Train stop: ");
+			}
+			channel.send(":speech_left: | " + newMsg);
 		}
 		else if (msg.includes("[WARNING]")) {
-			(bot.channels.cache.get(config.chatChannel) as Discord.TextChannel).send(":warning: | " + newMsg)
+			channel.send(":warning: | " + newMsg);
 		}
 		else if (!msg.includes("] <server>") && config.sendServerMessages) {
 			// Send incoming message from the server, which has no category or user to the Discord console channel
-			(bot.channels.cache.get(config.chatChannel) as Discord.TextChannel).send("? | " + msg)
+			channel.send("? | " + msg);
 		}
 	}
 }
