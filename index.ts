@@ -32,7 +32,7 @@ interface Config {
 	logLines: boolean;
 
 	startupMessage: {
-		
+
 		enabled: boolean;
 
 		message: string;
@@ -57,6 +57,12 @@ interface Config {
 	RconTimeout: number;
 
 	token: string;
+
+    autoCheckModUpdates: boolean;
+
+    factorioSettingsPath: string;
+
+    factorioModsPath: string;
 }
 
 interface Command {
@@ -157,12 +163,41 @@ async function runUpdateCheckAsync() {
 	}
 }
 
+async function modUpdateCheck() {
+    fs.access('mod_updater.py', function (err) {
+        if (err) {
+            console.log('Auto-retrieval of Factorio mod updates has been set to true, but the update script was not found. Did you forget to clone the repository?');
+            return;
+        }
+    });
+
+    PythonShell.run('mod_updater.py', {args:['-s', config.factorioSettingsPath, '-m', config.factorioModsPath, '--fact-path', config.factorioPath, '--list'], }, function (err, results: string[]) {
+        if (results == null) {
+            console.log("Error while checking for updates for mods.");
+            return;
+        }
+
+        if (err) {
+            console.log("Error while checking for updates for mods, please ensure your paths are set correctly.");
+        }
+
+        if (results[results.length - 1].includes("No updates found") && !config.silentCheck) {
+            console.log("No mod updates found.");
+        }
+        else if (results[results.length - 1].includes("has updates available")) {
+            bot.users.resolve(config.userToNotify)?.send("Factorio mod updates were found.\n" + results.slice(2, results.length - 1).join("\n"))
+            console.log("Mod updates found.");
+            console.log(results.slice(2, results.length - 1));
+        }
+    });
+}
+
 bot.on("ready", () => {
 	//connect to rcon
 	RconConnect();
 
 	console.log(`Connected to Discord! Logged in as: ${bot.user.username} - (${bot.user.id})`);
-	(bot.channels.cache.get(config.chatChannel) as Discord.TextChannel).send("[Chat System]: Online!");
+	(bot.channels.cache.get(config.chatChannel) as Discord.TextChannel).send("[Chat System]: " + (config.startupMessage.enabled ? config.startupMessage.message : "Online!"));
 
 	clearLogFile();
 
@@ -176,6 +211,13 @@ bot.on("ready", () => {
 	if (config.autoCheckUpdates) {
 		runUpdateCheckAsync();
 	}
+
+        if (config.autoCheckModUpdates) {
+            modUpdateCheck();
+            if (config.checkTime > 0) {
+                setInterval(modUpdateCheck, config.checkTime);
+            }
+        }
 
 	Commands.set("online", {
 		data: new SlashCommandBuilder()
@@ -206,7 +248,7 @@ bot.on("ready", () => {
 			interaction.reply("COMMAND RAN | `" + interaction.user.username + "`: " + comm);
 		},
 	})
-	
+
 	var commands2: any[] = [];
 	Commands.forEach((command: any)=> {
 		commands2.push(command.data.toJSON())
@@ -227,7 +269,7 @@ bot.on("ready", () => {
 
 bot.on('interactionCreate', async (interaction) => {
     if (!interaction.isCommand()) return;
-    
+
     const command = Commands.get(interaction.commandName);
 
     if (!command) return;
