@@ -166,12 +166,12 @@ async function modUpdateCheck() {
 
     PythonShell.run('mod_updater.py', {args:['-s', config.factorioSettingsPath, '-m', config.factorioModsPath, '--fact-path', config.factorioPath, '--list'], }, function (err, results: string[]) {
         if (results == null) {
-            console.log("Error while checking for updates for mods.");
+            console.log("Error while checking for mod updates.");
             return;
         }
 
         if (err) {
-            console.log("Error while checking for updates for mods, please ensure your paths are set correctly.");
+            console.log("Error while checking for mod updates, please ensure your paths are set correctly.");
         }
 
         if (results[results.length - 1].includes("No updates found") && !config.silentCheck) {
