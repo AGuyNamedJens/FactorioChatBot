@@ -13,8 +13,11 @@
         "message": "Factorio Chat Bot is now Online!"
     },
 
-    "factorioPath": "bin/x64/factorio",
+    "factorioPath": "/opt/factorio/bin/x64/factorio",
     "autoCheckUpdates": false,
+    "autoCheckModUpdates": false,
+    "factorioSettingsPath": "/opt/factorio/data/server-settings.json",
+    "factorioModsPath": "/opt/factorio/mods",
     "userToNotify": "User ID",
     "checkTime": 500000,
     "silentCheck": true,

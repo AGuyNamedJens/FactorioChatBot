@@ -1,9 +1,9 @@
 # Configuration
-    
+
   Rename `config.json.example` to `config.json` by using `mv config.json.example config.json`
   > Open this file in either the terminal (`nano config.json`, `vim config.json` or any other terminal editors) or via any SFTP file manager.
 
-  - Set `"logFile": "file"` to the path you set earlier. 
+  - Set `"logFile": "file"` to the path you set earlier.
 
   - set `"chatChannel": "Channel ID"` with your Discord channel ID for the chat messages. ([Help](https://support.discordapp.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-))
 
@@ -18,6 +18,12 @@
   - set `factorioPath` to the absolute path of your Factorio file, including the extension.
 
   - set `"autoCheckUpdates": false` to true if you want to have the bot check for latest Factorio packages on startup. **YOU MUST CLONE https://github.com/narc0tiq/factorio-updater AND MOVE `update_factorio.py` TO THIS DIRECTORY IN ORDER FOR THIS TO WORK**
+
+  - set `"autoCheckModUpdates": false` to true if you want to have the bot check for mod updates on startup. **YOU MUST CLONE https://github.com/pollen00/factorio-mod-updater AND MOVE `mod_updater.py` TO THIS DIRECTORY IN ORDER FOR THIS TO WORK**
+
+  - set ``"factorioModsPath": "/opt/factorio/mods"`` to the path of your Factorio mods folder.
+
+  - set ``"factorioSettingsPath": "/opt/factorio/data/server-settings.json"`` to the path of your Factorio server settings json file.
 
   - set `"userToNotify": "User ID"` to the Discord user ID of the user in which to notify if you would like the bot to notify the user when newer Factorio packages are found.
 
