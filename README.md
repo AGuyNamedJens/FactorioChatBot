@@ -1,16 +1,18 @@
 # Factorio Chat Bot
-Two-directional chat bot connecting Discord and Factorio chats together, written in Node.js.
-[Examples](https://github.com/MikhailMCraft/FactorioChatBot/blob/master/EXAMPLES.md)
+Two-Directional chat bot connecting Discord and Factorio chats together, written in nodejs.
+[Examples](https://github.com/AGuyNamedJens/FactorioChatBot/wiki/Examples)
 
 This bot does **not**:
-- Disable achievements **BY DEFAULT**.
+- Disable Achievements **BY DEFAULT**.
 - Require mods to run.
+
+The guide below and on the [Wiki](https://github.com/AGuyNamedJens/FactorioChatBot/wiki) is made for factorio servers on Linux. Windows guide might be added on a later date.
 
 # Requirements
   1. A Discord Bot
-  2. A Factorio server with RCON enabled
-  3. A Factorio server with Logging enabled
-  4. Node.js V14 (V16 is recommended!)
+  2. A factorio server with RCON enabled
+  3. A factorio server with Logging enabled
+  4. Node.JS V14 (V16 is recommended!)
 
 # Setting up a Discord Application
 
@@ -18,7 +20,7 @@ Head over to [Discord's developer page](https://discord.com/developers/applicati
 
 Open [this URL](https://discord.com/oauth2/authorize?client_id=CLIENT_ID&permissions=-1&scope=bot) and replace `CLIENT_ID` in the URL with the `Client ID` found on the application's `General Information` page. This should now show your bot, select your server to invite the bot there.
 
-Now, the bot should have joined the server, albeit offline.
+Now, the bot should have joined the server, and is currently offline.
 
 Head back to [Discord's developer page](https://discord.com/developers/applications), select the application again and head over to the `Bot` page under the settings tab.
 Create a bot by pressing "Add Bot" and copy the token to somewhere for a while. You will need this token later for the bot to connect to Discord.
@@ -55,28 +57,19 @@ Install or update Node.js on Linux by running these 2 commands:
 
 To verify Node is installed run `node -v` in a terminal.
 
-## Git
-### Windows
-Git for Windows can be found [on their website](https://git-scm.com/download/win)
-
-To verify Git is installed, run `git --version` in the terminal.
-
-### Linux
-`sudo apt install git -y` to install Git.
-
-To verify Git is installed, run `git --version` in the terminal.
-
 ## Node packages
-Clone or download the repository (read [Downloading and updating the repository](https://github.com/MikhailMCraft/FactorioChatBot#Downloading_and_updating_the_repository)).
+Clone or download the repository.
 
 Navigate to the containing folder and run `npm install` to install required packages.
 
 # Downloading and updating the repository
 ### Cloning and pulling the repository (recommended)
 
-Run `git clone https://github.com/MikhailMCraft/FactorioChatBot` in the folder in which to clone the repository to.
+Run `git clone https://github.com/AGuyNamedJens/FactorioChatBot` in the folder in which to clone the repository to.
 
 New changes can be fetched by running `git pull` in the directory periodically.
+
+To verify Git is installed, run `git --version` in the terminal.
 
 ### Downloading the newest release (not recommended)
 
@@ -86,12 +79,42 @@ Run the following command within the containing directory to install the require
 
 `npm install`
 
-Note that releases are not commonly distributed, so cloning and pulling the repo is recommended to keep up-to-date with changes.
+Please note that releases are not commonly distributed, so cloning and pulling the repo is recommended to keep up-to-date with changes.
 
 # Configuration
 
-See [CONFIG.MD](https://github.com/MikhailMCraft/FactorioChatBot/blob/master/CONFIG.md) for configuring the bot!
+See [CONFIG](https://github.com/AGuyNamedJens/FactorioChatBot/wiki/Configuration) for configuring the bot!
 
 # Running the bot from the terminal
 
-The bot can be run from the terminal by using `ts-node .` in the directory the bot is located.
+`node .` or `node FactorioChatBot.js`. 
+
+# Running the bot as a service
+
+This will keep the bot running when you exit the terminal.
+Follow the guide below or press the link on installing and setting up [PM2](https://pm2.keymetrics.io/docs/usage/quick-start/)
+
+Run the following command as root to install pm2 globally:
+
+`npm install pm2@latest -g`
+
+After pm2 has been installed, you should be able to start the bot by running the following command in the dir of the bot:
+
+`pm2 start index.js --name factoriochatbot` (You can change the name)
+
+To manage the newly created process, these commands exist:
+
+`pm2 restart app_name`,
+`pm2 reload app_name`,
+`pm2 stop app_name` and
+`pm2 delete app_name`
+
+For listing all applications:
+
+`pm2 [list|ls|status]`
+
+![Image](https://i.imgur.com/LmRD3FN.png)
+
+There is a way to view logs, which you can access by running:
+
+`pm2 logs app_name` and `pm2 logs app_name --lines 200` to dig into older logs.
