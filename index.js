@@ -90,13 +90,14 @@ bot.on("messageCreate", async (message) => {
 	if (message.channel.id === config.chatChannel) {
 		// send to the server
 		if (config.cleanMessages == true) {
-			rcon.send('/silent-command game.print("[color=#7289DA][Discord] ' + message.author.username + ': ' + message.content + '[/color]")');
+			rcon.send(`/silent-command game.print('[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content.replace(/"/g, '\\"').replace(/'/g, "\\'")} ${message.content} [/color]')`);
 		} else {
-			rcon.send('[color=#7289DA][Discord] ' + message.author.username + ': ' + message.content + '[/color]');
+			rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content.replace(/"/g, '\\"').replace(/'/g, "\\'")} ${message.content} [/color]`);
 		}
 		// send to the channel showing someone sent a message to the server and delete their message from the channel
 		message.channel.send(":speech_balloon: | `" + message.author.username + "`: " + message.content);
-		message.delete();
+		
+		if(config.deleteMessages) message.delete();
 
 	} else if (message.channel.id === config.consoleChannel) {
 		// send command to the server
@@ -140,24 +141,36 @@ function parseMessage(msg) {
 	var newMsg = "`" + msg.slice(index + 2, indexName) + "`" + msg.slice(indexName);
 
 	if (msg.length && index > 1) {
-		if (msg.slice(1, index).includes("LEAVE")) {
+		var channel = bot.channels.cache.get(config.chatChannel);
+		if (msg.includes('[LEAVE]')) {
 			// Send leave message to the Discord channel
-			bot.channels.cache.get(config.chatChannel).send(":red_circle: | " + msg.slice(index + 2))
+			channel.send(":red_circle: | " + msg.slice(index + 2));
 			// Send leave message to the server
-			if (config.cleanMessages == true) rcon.send('/silent-command game.print("[color=red]' + msg.slice(index + 2) + '[/color]")');
-			else rcon.send('[color=red]' + msg.slice(index + 2) + '[/color]');
-		} else if (msg.slice(1, index).includes("JOIN")) {
+			if (config.cleanMessages == true) {
+				rcon.send('/silent-command game.print("[color=red]' + msg.slice(index + 2) + '[/color]")');
+			}
+			else {
+				rcon.send('[color=red]' + msg.slice(index + 2) + '[/color]');
+			}
+		}
+		else if (msg.includes('[JOIN]')) {
 			// Send join message to the Discord channel
-			bot.channels.cache.get(config.chatChannel).send(":green_circle: | " + msg.slice(index + 2))
+			channel.send(":green_circle: | " + msg.slice(index + 2));
 			// Send join message to the server
-			if (config.cleanMessages == true) rcon.send('/silent-command game.print("[color=green]' + msg.slice(index + 2) + '[/color]")');
-			else rcon.send('[color=green]' + msg.slice(index + 2) + '[/color]');
-		} else if (msg.slice(1, index).includes("CHAT") && !msg.includes("<server>")) {
+			if (config.cleanMessages == true) {
+				rcon.send('/silent-command game.print("[color=green]' + msg.slice(index + 2) + '[/color]")');
+			}
+			else {
+				rcon.send('[color=green]' + msg.slice(index + 2) + '[/color]');
+			}
+		}
+		else if (msg.includes("[CHAT]") && !msg.includes("[CHAT] <server>")) {
 			// Send incoming chat from the server to the Discord channel
-			bot.channels.cache.get(config.chatChannel).send(":speech_left: | " + newMsg)
-		} else if (!msg.includes("<server>") && config.consoleChannel !== false) {
+			channel.send(":speech_left: | " + newMsg);
+		}
+		else if (!msg.includes("] <server>") && config.consoleChannel) {
 			// Send incoming message from the server, which has no category or user to the Discord console channel
-			bot.channels.cache.get(config.consoleChannel).send("? | " + msg.slice(index + 1))
+			channel.send("? | " + msg);
 		}
 	}
 }
