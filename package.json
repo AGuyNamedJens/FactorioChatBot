@@ -1,10 +1,10 @@
 {
   "name": "factorio-bot",
   "version": "0.0.9-beta",
-  "description": "Jens's factorio bot connecting discord and factorio by using RCON",
+  "description": "Jens's Factorio bot connecting Discord and Factorio via RCON.",
   "main": "index.ts",
   "scripts": {
-    "start": "node index.js",
+    "start": "ts-node index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Jens",
