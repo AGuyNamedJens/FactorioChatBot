@@ -178,9 +178,9 @@ async function modUpdateCheck() {
             console.log("No mod updates found.");
         }
         else if (results[results.length - 1].includes("has updates available")) {
-            bot.users.resolve(config.userToNotify)?.send("Factorio mod updates were found.\n" + results.slice(2, results.length - 1).join("\n"))
+            bot.users.resolve(config.userToNotify)?.send("Factorio mod updates were found.\n" + results.slice(2, results.length).join("\n"))
             console.log("Mod updates found.");
-            console.log(results.slice(2, results.length - 1));
+            console.log(results.slice(2, results.length));
         }
     });
 }
