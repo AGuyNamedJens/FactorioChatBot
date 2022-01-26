@@ -41,7 +41,7 @@ function RconConnect() {
 		clearLogFile();
 
 		if (config.startupMessage.enabled) {
-			if (config.cleanMessages == true) {
+			if (config.cleanMessages) {
 				rcon.send('/silent-command game.print("[Chat System]: ' + config.startupMessage.message + '")');
 			} else {
 				rcon.send('[Chat System]: ' + config.startupMessage.message);
@@ -89,15 +89,14 @@ bot.on("messageCreate", async (message) => {
 
 	if (message.channel.id === config.chatChannel) {
 		// send to the server
-		if (config.cleanMessages == true) {
+		if (config.cleanMessages) {
 			rcon.send(`/silent-command game.print('[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content.replace(/"/g, '\\"').replace(/'/g, "\\'")} ${message.content} [/color]')`);
 		} else {
 			rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content.replace(/"/g, '\\"').replace(/'/g, "\\'")} ${message.content} [/color]`);
 		}
-		// send to the channel showing someone sent a message to the server and delete their message from the channel
-		if(config.sentMessage) message.channel.send(":speech_balloon: | `" + message.author.username + "`: " + message.content);
-
-		if(config.deleteMessages) message.delete();
+		// send showing someone sent a message to the server in discord and delete their message from the channel
+		if (config.sentMessages) message.channel.send(":speech_balloon: | `" + message.author.username + "`: " + message.content);
+		if (config.deleteMessages) message.delete();
 
 	} else if (message.channel.id === config.consoleChannel) {
 		// send command to the server
@@ -108,7 +107,7 @@ bot.on("messageCreate", async (message) => {
 		// Command with the prefix defined in config.js to show online players
 		const players = await getOnlinePlayers();
 		// Send the message to the Discord channel
-		message.channel.send(`There are currently ${players.length} player(s) online${players.length > 0 ? ` with the name(s):\n- \`${players.join("`\n- `")}\`` : "."}`)
+		message.channel.send(`There are currently ${players.length} player(s) online with the name${players.length > 0 ? "(s)" : ""}:\n- \`${players.join("`\n- `")}\`.`);
 	}
 });
 
@@ -146,7 +145,7 @@ function parseMessage(msg) {
 			// Send leave message to the Discord channel
 			channel.send(":red_circle: | " + msg.slice(index + 2));
 			// Send leave message to the server
-			if (config.cleanMessages == true) {
+			if (config.cleanMessages) {
 				rcon.send('/silent-command game.print("[color=red]' + msg.slice(index + 2) + '[/color]")');
 			}
 			else {
@@ -157,7 +156,7 @@ function parseMessage(msg) {
 			// Send join message to the Discord channel
 			channel.send(":green_circle: | " + msg.slice(index + 2));
 			// Send join message to the server
-			if (config.cleanMessages == true) {
+			if (config.cleanMessages) {
 				rcon.send('/silent-command game.print("[color=green]' + msg.slice(index + 2) + '[/color]")');
 			}
 			else {
@@ -184,10 +183,10 @@ function readLastLine(path) {
 		//get last line of file. 
 		if (err) throw err;
 		var lines = data.trim().split('\n');
-		lastLine = lines.slice(-1)[0];
+		let lastLine = lines.slice(-1)[0];
 
 		// I should really optimize or completely remove this line
-		if (config.logLines == true) console.log(lastLine);
+		if (config.logLines) console.log(lastLine);
 
 		if (path == config.logFile && lastLine.length > 0) {
 			// Parse name and message and send it
