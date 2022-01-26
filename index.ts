@@ -358,10 +358,13 @@ function parseMessage(msg: string) {
 		else if (msg.includes("[CHAT]") && !msg.includes("[CHAT] <server>")) {
 			// Send incoming chat from the server to the Discord channel
 			if (msg.includes("[gps=") && msg.includes(",") && msg.includes("]")) {
-				newMsg.replaceAll("gps=", "Location: ");
+				newMsg = newMsg.replaceAll("gps=", "Location: ");
 			}
 			if (msg.includes("[train-stop=") && msg.includes(",") && msg.includes("]")) {
-				newMsg.replaceAll("train-stop=", "Train stop: ");
+				newMsg = newMsg.replaceAll("train-stop=", "Train stop: ");
+			}
+			if (msg.includes("[train=") && msg.includes("]")) {
+				newMsg = newMsg.replaceAll("train=", "Train: ");
 			}
 			channel.send(":speech_left: | " + newMsg);
 		}
