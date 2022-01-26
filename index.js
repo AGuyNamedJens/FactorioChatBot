@@ -95,8 +95,8 @@ bot.on("messageCreate", async (message) => {
 			rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content.replace(/"/g, '\\"').replace(/'/g, "\\'")} ${message.content} [/color]`);
 		}
 		// send to the channel showing someone sent a message to the server and delete their message from the channel
-		message.channel.send(":speech_balloon: | `" + message.author.username + "`: " + message.content);
-		
+		if(config.sentMessage) message.channel.send(":speech_balloon: | `" + message.author.username + "`: " + message.content);
+
 		if(config.deleteMessages) message.delete();
 
 	} else if (message.channel.id === config.consoleChannel) {

@@ -4,6 +4,8 @@
     "prefix": "?",
     "chatChannel": "Channel ID",
     "cleanMessages": false,
+
+    "sentMessage": true,
     "deleteMessages": false,
     "consoleChannel": false,
 
