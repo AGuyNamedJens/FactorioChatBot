@@ -94,9 +94,12 @@ bot.on("messageCreate", async (message) => {
 		} else {
 			rcon.send('[color=#7289DA][Discord] ' + message.author.username + ': ' + message.content + '[/color]');
 		}
+
 		// send to the channel showing someone sent a message to the server and delete their message from the channel
-		message.channel.send(":speech_balloon: | `" + message.author.username + "`: " + message.content);
-		message.delete();
+		if(config.fancyDiscord) {
+			message.channel.send(":speech_balloon: | `" + message.author.username + "`: " + message.content);
+			message.delete();
+		}
 
 	} else if (message.channel.id === config.consoleChannel) {
 		// send command to the server
