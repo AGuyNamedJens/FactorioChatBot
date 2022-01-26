@@ -90,9 +90,9 @@ bot.on("messageCreate", async (message) => {
 	if (message.channel.id === config.chatChannel) {
 		// send to the server
 		if (config.cleanMessages) {
-			rcon.send(`/silent-command game.print('[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content.replace(/"/g, '\\"').replace(/'/g, "\\'")} ${message.content} [/color]')`);
+			rcon.send(`/silent-command game.print('[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content.replace(/"/g, '\\"').replace(/'/g, "\\'")} [/color]')`);
 		} else {
-			rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content.replace(/"/g, '\\"').replace(/'/g, "\\'")} ${message.content} [/color]`);
+			rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content.replace(/"/g, '\\"').replace(/'/g, "\\'")} [/color]`);
 		}
 		// send showing someone sent a message to the server in discord and delete their message from the channel
 		if (config.sentMessages) message.channel.send(":speech_balloon: | `" + message.author.username + "`: " + message.content);
