@@ -11,8 +11,8 @@ COPY package.json package-lock.json /opt/FactorioChatBot/
 RUN cd /opt/FactorioChatBot
 RUN npm install
 
-# Mount the docker volume to the host
-VOLUME /opt/FactorioChatBot
+# Mount the docker volume for the config file to the host
+VOLUME /opt/FactorioChatBot/config
 
 # Bind the log file which could be created by another container.
 VOLUME /opt/factorio/Factorio-server.log

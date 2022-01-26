@@ -125,3 +125,12 @@ For listing all applications:
 There is a way to view logs, which you can access by running:
 
 `pm2 logs app_name` and `pm2 logs app_name --lines 200` to dig into older logs.
+
+# Docker
+Currently you need to build the container yourself as there is no image on Docker Hub (yet)
+1. `docker build -t factorio-chat-bot .`
+2. `docker run  --name FactorioChatBot --restart=always -d -v /path/to/config:/opt/FactorioChatBot/config -v /path/to/factorio/logfile:/opt/factorio/Factorio-server.log factorio-chat-bot `
+3. `docker start FactorioChatBot`
+
+Or run it interactive (once):
+1. `docker run --rm -it FactorioChatBot -v /path/to/config:/opt/FactorioChatBot/config -v /path/to/factorio/logfile:/opt/factorio/Factorio-server.log`
