@@ -6,7 +6,7 @@
     "consoleChannel": false,
 
     "cleanMessages": false,
-    "deleteMessages": false,
+    "deleteMessages": true,
     "sentMessages": true,
 
     "logLines": false,
