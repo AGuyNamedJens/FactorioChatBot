@@ -1,10 +1,10 @@
 {
     "logFile": "/opt/factorio/Factorio-server.log",
 
+    "prefix": "?",
     "chatChannel": "Channel ID",
     "cleanMessages": false,
-    "adminsCanRunCommands": false,
-    "sendServerMessages": false,
+    "consoleChannel": false,
 
     "logLines": false,
 
@@ -13,19 +13,9 @@
         "message": "Factorio Chat Bot is now Online!"
     },
 
-    "factorioPath": "/opt/factorio/bin/x64/factorio",
-    "autoCheckUpdates": false,
-    "autoCheckModUpdates": false,
-    "factorioSettingsPath": "/opt/factorio/data/server-settings.json",
-    "factorioModsPath": "/opt/factorio/mods",
-    "userToNotify": "User ID",
-    "checkTime": 500000,
-    "silentCheck": true,
-
     "RconIP": "127.0.0.1",
     "RconPort": "port",
     "RconPassword": "password",
-    "RconTimeout": 2000,
 
     "token": "Bot Token"
 }

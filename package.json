@@ -1,23 +1,18 @@
 {
   "name": "factorio-bot",
   "version": "0.0.9-beta",
-  "description": "Jens's Factorio bot connecting Discord and Factorio via RCON.",
-  "main": "index.ts",
+  "description": "Jens's factorio bot connecting discord and factorio by using RCON",
+  "main": "index.js",
   "scripts": {
-    "start": "ts-node index.ts",
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Jens",
   "license": "ISC",
   "dependencies": {
-    "@discordjs/builders": "^0.11.0",
-    "@discordjs/rest": "^0.2.0-canary.0",
-    "discord-api-types": "^0.26.1",
     "chokidar": "^3.5.2",
     "discord.js": "^13.2.0",
-    "python-shell": "^3.0.1",
-    "rcon-client": "^4.2.3",
-    "typescript": "^4.5.4"
+    "rcon-client": "^4.2.3"
   },
   "engines": {
     "node": ">=14.18.0",
