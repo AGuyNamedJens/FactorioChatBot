@@ -60,23 +60,31 @@ function RconConnect() {
 		console.log(`Socket connection ended! Reconnecting..`)
 		RconConnect();
 	});
-};
+}
 
 /*
 * Bot start event
 */
 
 bot.on("ready", () => {
-	//connect to rcon
+	// Connect to rcon
 	RconConnect();
 
 	console.log('Connected to Discord! Logged in as: ' + bot.user.username + ' - (' + bot.user.id + ')');
-	bot.channels.cache.get(config.chatChannel).send("[Chat System]: Online!")
+	if(config.startupMessage.enabled) bot.channels.cache.get(config.chatChannel).send("[Chat System]: Online!")
 
-	//watch the log file for updates
+	// Watch the log file for updates
 	chokidar.watch(config.logFile, { ignored: /(^|[\/\\])\../ }).on('all', (event, path) => {
 		readLastLine(config.logFile);
 	});
+
+	// Read custom events, logged in factorio's script-output folder
+	if (config.customLogFile !== false) {
+		//watch the custom log file for updates
+		chokidar.watch(config.customLogFile, { ignored: /(^|[\/\\])\../ }).on('all', (event, path) => {
+			readLastLine(config.customLogFile);
+		});
+	}
 });
 
 /*
@@ -98,11 +106,11 @@ bot.on("messageCreate", async (message) => {
 		if (config.sentMessages) message.channel.send(":speech_balloon: | `" + message.author.username + "`: " + message.content);
 		if (config.deleteMessages) message.delete();
 
-	} else if (message.channel.id === config.consoleChannel) {
-		// send command to the server
-		rcon.send('/' + message.content);
-		// send to the channel showing someone sent a command to the server
-		message.channel.send("COMMAND RAN | `" + message.author.username + "`: " + message.content);
+		// } else if (message.channel.id === config.consoleChannel) {
+		// 	// send command to the server
+		// 	rcon.send('/' + message.content);
+		// 	// send to the channel showing someone sent a command to the server
+		// 	message.channel.send("COMMAND RAN | `" + message.author.username + "`: " + message.content);
 	} else if (message.content.startsWith(`${config.prefix}online`)) {
 		// Command with the prefix defined in config.js to show online players
 		const players = await getOnlinePlayers();
@@ -141,6 +149,8 @@ function parseMessage(msg) {
 
 	if (msg.length && index > 1) {
 		var channel = bot.channels.cache.get(config.chatChannel);
+		var consoleChannel = bot.channels.cache.get(config.consoleChannel);
+
 		if (msg.includes('[LEAVE]')) {
 			// Send leave message to the Discord channel
 			channel.send(":red_circle: | " + msg.slice(index + 2));
@@ -167,9 +177,9 @@ function parseMessage(msg) {
 			// Send incoming chat from the server to the Discord channel
 			channel.send(":speech_left: | " + newMsg);
 		}
-		else if (!msg.includes("] <server>") && config.consoleChannel) {
+		else if (!msg.includes("] <server>") && config.consoleChannel !== false) {
 			// Send incoming message from the server, which has no category or user to the Discord console channel
-			channel.send("? | " + msg);
+			consoleChannel.send("? | " + msg);
 		}
 	}
 }
@@ -185,15 +195,16 @@ function readLastLine(path) {
 		var lines = data.trim().split('\n');
 		let lastLine = lines.slice(-1)[0];
 
+		const logs = [config.customLogFile, config.logFile];
+
 		// I should really optimize or completely remove this line
 		if (config.logLines) console.log(lastLine);
 
-		if (path == config.logFile && lastLine.length > 0) {
+		if (logs.includes(path) && lastLine.length > 0) {
 			// Parse name and message and send it
 			parseMessage(lastLine);
 		}
 	});
-
 
 }
 
