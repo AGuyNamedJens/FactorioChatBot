@@ -89,7 +89,7 @@ bot.on("messageCreate", async (message) => {
 
 	if (message.channel.id === config.chatChannel) {
 		// send to the server
-		if (config.cleanMessages == true) {
+		if (config.cleanMessages) {
 			rcon.send('/silent-command game.print("[color=#7289DA][Discord] ' + message.author.username + ': ' + message.content + '[/color]")');
 		} else {
 			rcon.send('[color=#7289DA][Discord] ' + message.author.username + ': ' + message.content + '[/color]');
@@ -106,8 +106,9 @@ bot.on("messageCreate", async (message) => {
 	} else if (message.content.startsWith(`${config.prefix}online`)) {
 		// Command with the prefix defined in config.js to show online players
 		const players = await getOnlinePlayers();
+		const isMulti = players.length > 0 ? "(s)" : "";
 		// Send the message to the Discord channel
-		message.channel.send(`There are currently ${players.length} player(s) online${players.length > 0 ? ` with the name(s):\n- \`${players.join("`\n- `")}\`` : "."}`)
+		message.channel.send(`There are currently ${players.length} player${isMulti} online with the name${isMulti}:\n- \`${players.join("`\n- `")}\`.`);
 	}
 });
 
@@ -139,26 +140,48 @@ function parseMessage(msg) {
 	var indexName = msg.indexOf(': ');
 	var newMsg = "`" + msg.slice(index + 2, indexName) + "`" + msg.slice(indexName);
 
-	if (msg.length && index > 1) {
-		if (msg.slice(1, index).includes("LEAVE")) {
+	var indication = msg.slice(index + 2, indexName);
+	var message;
+
+	if (!msg.length && index == 0) return;
+
+	console.log(newMsg, index);
+
+	switch (indication) {
+		case "LEAVE":
 			// Send leave message to the Discord channel
 			bot.channels.cache.get(config.chatChannel).send(":red_circle: | " + msg.slice(index + 2))
 			// Send leave message to the server
-			if (config.cleanMessages == true) rcon.send('/silent-command game.print("[color=red]' + msg.slice(index + 2) + '[/color]")');
-			else rcon.send('[color=red]' + msg.slice(index + 2) + '[/color]');
-		} else if (msg.slice(1, index).includes("JOIN")) {
+			message = '[color=red]' + msg.slice(index + 2) + '[/color]")';
+			break;
+		case "JOIN":
 			// Send join message to the Discord channel
 			bot.channels.cache.get(config.chatChannel).send(":green_circle: | " + msg.slice(index + 2))
 			// Send join message to the server
-			if (config.cleanMessages == true) rcon.send('/silent-command game.print("[color=green]' + msg.slice(index + 2) + '[/color]")');
-			else rcon.send('[color=green]' + msg.slice(index + 2) + '[/color]');
-		} else if (msg.slice(1, index).includes("CHAT") && !msg.includes("<server>")) {
+			message = '[color=green]' + msg.slice(index + 2) + '[/color]")'
+			break;
+		case "CHAT":
+			if (msg.includes("<server>")) break;
 			// Send incoming chat from the server to the Discord channel
 			bot.channels.cache.get(config.chatChannel).send(":speech_left: | " + newMsg)
-		} else if (!msg.includes("<server>") && config.consoleChannel !== false) {
+			break;
+		case "<server>":
+			if (!config.consoleChannel) break;
+			// Send incoming console message from the server to the Discord channel
+			bot.channels.cache.get(config.consoleChannel).send(":console: | " + newMsg)
+			break;
+		default:
+			if (indication == "<server>" || !config.consoleChannel) break;
 			// Send incoming message from the server, which has no category or user to the Discord console channel
 			bot.channels.cache.get(config.consoleChannel).send("? | " + msg.slice(index + 1))
-		}
+			break;
+	}
+
+	if (config.cleanMessages) {
+		rcon.send('/silent-command game.print(' + message + ')');
+	}
+	else {
+		rcon.send(message);
 	}
 }
 
@@ -171,10 +194,10 @@ function readLastLine(path) {
 		//get last line of file. 
 		if (err) throw err;
 		var lines = data.trim().split('\n');
-		lastLine = lines.slice(-1)[0];
+		let lastLine = lines.slice(-1)[0];
 
-		// I should really optimize or completely remove this line
-		if (config.logLines == true) console.log(lastLine);
+		// Debugging feature. If enabled, sends the last line to the console
+		if (config.logLines) console.log(lastLine);
 
 		if (path == config.logFile && lastLine.length > 0) {
 			// Parse name and message and send it
