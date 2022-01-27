@@ -4,7 +4,7 @@ FROM node:16
 WORKDIR /opt/FactorioChatBot
 
 # Copy the required files to the container
-COPY index.js /opt/FactorioChatBot/index.js
+COPY index.ts /opt/FactorioChatBot/index.ts
 COPY package.json package-lock.json /opt/FactorioChatBot/
 
 # Install dependencies
@@ -18,4 +18,4 @@ VOLUME /opt/FactorioChatBot
 VOLUME /opt/factorio/Factorio-server.log
 
 # Run the bot
-CMD ["node", "."]
+CMD ["ts-node", "."]
