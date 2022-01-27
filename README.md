@@ -1,4 +1,4 @@
-# Factorio Chat Bot
+# Factorio Chat Bot - Typescript Edition
 Two-directional chat bot connecting Discord and Factorio chats together, written in TypeScript using Node.js.
 [Examples](https://github.com/AGuyNamedJens/FactorioChatBot/wiki/Examples)
 
