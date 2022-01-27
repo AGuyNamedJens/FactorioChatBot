@@ -9,8 +9,6 @@ var config;
 try {
 	if (fs.existsSync("./config/config.json")) {
 		config = require("./config/config.json");
-	} else if (fs.existsSync("/opt/FactorioChatBot/config/config.json")) {
-		config = require("/opt/FactorioChatBot/config/config.json");
 	} else {
 		console.log("Unable to find config file, see README.md");
 		return;
