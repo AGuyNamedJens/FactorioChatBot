@@ -214,6 +214,12 @@ function clearLogFile() {
 		console.log("Cleared previous chat log");
 	});
 
+	if(console.customLogFile !== false) {
+		fs.writeFile(config.customLogFile, "", function () {
+			console.log("Cleared previous event log");
+		});
+	}
+
 }
 
 /*	rconCommand function
