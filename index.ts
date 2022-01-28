@@ -1,12 +1,12 @@
-import Discord, { Intents } from 'discord.js';
+import Discord, {Intents} from 'discord.js';
 import fs from "fs";
 import chokidar from "chokidar";
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { REST } from '@discordjs/rest';
-import { Routes } from 'discord-api-types/v9';
-import { PythonShell } from 'python-shell';
+import {SlashCommandBuilder} from '@discordjs/builders';
+import {REST} from '@discordjs/rest';
+import {Routes} from 'discord-api-types/v9';
+import {PythonShell} from 'python-shell';
 
-import { Rcon } from "rcon-client";
+import {Rcon} from "rcon-client";
 
 var config: Config = require("./config.json");
 
@@ -15,6 +15,13 @@ const rest = new REST({ version: '9' }).setToken(config.token);
 const bot = new Discord.Client({ intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_PRESENCES, Intents.FLAGS.GUILD_INTEGRATIONS], allowedMentions: { users: [], roles: [] } });
 
 const Commands: Discord.Collection<string, Command> = new Discord.Collection();
+
+enum LOGLEVELS {
+	DEBUG = 5,// A lot of logging
+	INFO = 3,// Status updates of the bot and usefull info (default)
+	ERROR = 1// Only logs that prevents the bot from working correctly
+}
+let logLevel: LOGLEVELS
 
 bot.login(config.token);
 
@@ -63,6 +70,8 @@ interface Config {
 	factorioSettingsPath: string;
 
 	factorioModsPath: string;
+
+	logLevel: string;
 }
 
 interface Command {
@@ -88,7 +97,7 @@ function RconConnect() {
 
 		// try again with a max of 10 tries in a cooldown of 5 seconds per try
 		if (tries <= 10) {
-			console.log(`Attempting to reconnect... (${tries}/10)`);
+			log(LOGLEVELS.INFO, `Attempting to reconnect... (${tries}/10)`);
 			setTimeout(function () {
 				RconConnect();
 				tries++;
@@ -98,12 +107,12 @@ function RconConnect() {
 
 	// Connected, which means the connection is successful
 	rcon.on("connect", () => {
-		console.log('Connected to the Factorio server!');
+		log(LOGLEVELS.INFO, 'Connected to the Factorio server!');
 	});
 
 	// Authenticated, which means the authentication is successful and the system is online
 	rcon.on("authenticated", () => {
-		console.log('Authenticated!');
+		log(LOGLEVELS.INFO, 'Authenticated!');
 
 		if (config.startupMessage.enabled) {
 			if (config.cleanMessages) {
@@ -123,7 +132,7 @@ function RconConnect() {
 
 	// Log a message on connection end
 	rcon.on("end", () => {
-		console.log('Socket connection ended!');
+		log(LOGLEVELS.INFO, 'Socket connection ended!');
 	});
 }
 
@@ -134,21 +143,21 @@ function RconConnect() {
 async function updateCheck() {
 	fs.access('update_factorio.py', function (err) {
 		if (err) {
-			return console.log('Auto-retrieval of Factorio package updates has been set to true, but the update script was not found. Did you forget to clone the repository?');
+			log(LOGLEVELS.INFO, 'Auto-retrieval of Factorio package updates has been set to true, but the update script was not found. Did you forget to clone the repository?');
 		}
 	});
 	PythonShell.run('update_factorio.py', { args: ['-d', '-a', config.factorioPath] }, function (_err: PythonShell.Error, results: string[]) {
 		if (results == null) {
-			console.log('Error while checking for updates for the Factorio binary. Ensure the provided path in the config file is set correctly.');
+			log(LOGLEVELS.ERROR, 'Error while checking for updates for the Factorio binary. Ensure the provided path in the config file is set correctly.');
 			return;
 		}
 		if (results[1].includes("No updates available") && !config.silentCheck) {
-			console.log(`No updates found for provided Factorio binary (version ${results[0].slice(results[0].indexOf('version as') + 11, results[0].indexOf('from') - 1)}).`);
+			log(LOGLEVELS.INFO, `No updates found for provided Factorio binary (version ${results[0].slice(results[0].indexOf('version as') + 11, results[0].indexOf('from') - 1)}).`);
 		}
 		else if (results[1].includes("Dry run:")) {
 			bot.users.resolve(config.userToNotify)?.send(`Newer Factorio packages were found.\nCurrent version: \`${results[0].slice(results[0].indexOf('version as') + 11, results[0].indexOf('from') - 1)}\`\nLatest version: \`${results[results.length - 1].slice(results[results.length - 1].indexOf('to ') + 3, results[results.length - 1].length - 1)}\``);
 			if (!config.silentCheck) {
-				console.log(`Updates available for provided Factorio binary (${results[0].slice(results[0].indexOf('version as') + 11, results[0].indexOf('from') - 1)} --> ${results[results.length - 1].slice(results[results.length - 1].indexOf('to ') + 3, results[results.length - 1].length - 1)}).`);
+				log(LOGLEVELS.INFO, `Updates available for provided Factorio binary (${results[0].slice(results[0].indexOf('version as') + 11, results[0].indexOf('from') - 1)} --> ${results[results.length - 1].slice(results[results.length - 1].indexOf('to ') + 3, results[results.length - 1].length - 1)}).`);
 			}
 		}
 		console.log(results);
@@ -162,27 +171,28 @@ async function updateCheck() {
 async function modUpdateCheck() {
 	fs.access('mod_updater.py', function (err) {
 		if (err) {
-			return console.log('Auto-retrieval of Factorio mod updates has been set to true, but the update script was not found. Did you forget to clone the repository?');
+			log(LOGLEVELS.INFO, 'Auto-retrieval of Factorio mod updates has been set to true, but the update script was not found. Did you forget to clone the repository?');
+			return;
 		}
 	});
 
 	PythonShell.run('mod_updater.py', { args: ['-s', config.factorioSettingsPath, '-m', config.factorioModsPath, '--fact-path', config.factorioPath, '--list'], }, function (err: PythonShell.Error, results: string[]) {
 		if (results == null) {
-			console.log("Error while checking for mod updates.");
+			log(LOGLEVELS.ERROR, "Error while checking for mod updates.");
 			return;
 		}
 
 		if (err) {
-			console.log("Error while checking for mod updates, please ensure your paths are set correctly.");
+			log(LOGLEVELS.ERROR, "Error while checking for mod updates, please ensure your paths are set correctly.");
 		}
 
 		if (results[results.length - 1].includes("No updates found") && !config.silentCheck) {
-			console.log("No mod updates found.");
+			log(LOGLEVELS.INFO, "No mod updates found.");
 		}
 		else if (results[results.length - 1].includes("has updates available")) {
 			bot.users.resolve(config.userToNotify)?.send("Factorio mod updates were found.\n" + results.slice(2, results.length).join("\n"))
-			console.log("Mod updates found.");
-			console.log(results.slice(2, results.length));
+			log(LOGLEVELS.INFO, "Mod updates found.");
+			log(LOGLEVELS.INFO, results.slice(2, results.length));
 		}
 	});
 }
@@ -195,7 +205,7 @@ bot.on("ready", () => {
 	//connect to rcon
 	RconConnect();
 
-	console.log(`Connected to Discord! Logged in as: ${bot.user.username} - (${bot.user.id})`);
+	log(LOGLEVELS.INFO, `Connected to Discord! Logged in as: ${bot.user.username} - (${bot.user.id})`);
 	(bot.channels.cache.get(config.chatChannel) as Discord.TextChannel).send("[Chat System]: " + (config.startupMessage.enabled ? config.startupMessage.message : "Online!"));
 
 	clearLogFile();
@@ -205,7 +215,7 @@ bot.on("ready", () => {
 		readLastLine(config.logFile);
 	});
 
-	console.log('Watching log file.');
+	log(LOGLEVELS.INFO, 'Watching log file.');
 
 	if (config.autoCheckUpdates) {
 		updateCheck();
@@ -227,7 +237,7 @@ bot.on("ready", () => {
 			.setDescription('Lists online players'),
 		async execute(interaction: Discord.CommandInteraction) {
 			const players = await getOnlinePlayers();
-	
+
 			interaction.reply(`There ${players.length != 1 ? "are" : "is"} currently ${players.length} player${players.length != 1 ? "s" : ""} online${players.length > 0 ? `:\n- \`${players.join("`\n- `")}\`` : "."}`);
 		},
 	})
@@ -238,6 +248,7 @@ bot.on("ready", () => {
 			.addStringOption(option => option.setName('command').setDescription('The command to run on the server').setRequired(true)),
 		async execute(interaction: Discord.CommandInteraction) {
 			const comm = interaction.options.getString('command');
+			log(LOGLEVELS.DEBUG, `Got command from Discord: ${comm}`);
 			// send command to the server
 			rcon.send('/' + comm);
 			// send to the channel showing someone sent a command to the server
@@ -287,6 +298,7 @@ bot.on("messageCreate", async (message) => {
 	if (message.author.bot) return;
 
 	if (message.channel.id === config.chatChannel) {
+		log(LOGLEVELS.DEBUG, `Got message from Discord: ${message.content}`);
 		// send to the server
 		if (message.content.length > 0) {
 			if (config.cleanMessages) {
@@ -404,7 +416,7 @@ function readLastLine(path: fs.PathOrFileDescriptor) {
 
 		// I should really optimize or completely remove this line
 		if (config.logLines) {
-			console.log(lastLine);
+			log(LOGLEVELS.DEBUG, `Got message from Factorio ${lastLine}`);
 		}
 
 		if (path == config.logFile && lastLine.length > 0) {
@@ -420,4 +432,35 @@ function readLastLine(path: fs.PathOrFileDescriptor) {
 function clearLogFile() {
 	fs.writeFileSync(config.logFile, "");
 	console.log('Cleared previous chat log.');
+}
+
+/**
+ * Set the log level in the app based on the config file
+ */
+function setLogLevel() {
+	switch (config.logLevel) {
+		case "error":
+			logLevel = LOGLEVELS.ERROR
+			break;
+		case "info":
+			logLevel = LOGLEVELS.INFO
+			break;
+		case "debug":
+			logLevel = LOGLEVELS.DEBUG
+			break;
+		default:
+			console.log("Unsupported log format: '" + config.logLevel + "', defaulting to info")
+			logLevel = LOGLEVELS.INFO
+	}
+}
+
+/**
+ * Log a message to the console if our log level is low enough
+ * @param msgLevel
+ * @param message
+ */
+function log(msgLevel: LOGLEVELS, message: string) {
+	if (msgLevel <= logLevel) {
+		console.log(message);
+	}
 }

@@ -5,6 +5,7 @@
     "cleanMessages": false,
     "adminsCanRunCommands": false,
     "sendServerMessages": false,
+    "logLevel": "info",
 
     "logLines": false,
 
