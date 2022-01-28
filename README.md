@@ -126,7 +126,16 @@ There is a way to view logs, which you can access by running:
 
 `pm2 logs app_name` and `pm2 logs app_name --lines 200` to dig into older logs.
 
-# Docker
+To have the bot automatically start when the server itself reboots, run the following command:
+`pm2 startup`
+
+Follow the instructions in the output to schedule the service depending on your system. For example, on Ubuntu 20.04, the output should look similar to:
+
+`[PM2] Init System found: systemd
+[PM2] To setup the Startup Script, copy/paste the following command:
+sudo env PATH=$PATH:/usr/local/bin /usr/local/lib/node_modules/pm2/bin/pm2 startup systemd -u defaultuser --hp /home/defaultuser`
+
+# Running the bot using Docker
 Currently you need to build the container yourself as there is no image on Docker Hub (yet)
 1. `docker build -t factorio-chat-bot .`
 2. `docker run  --name FactorioChatBot --restart=always -d -v /path/to/config:/opt/FactorioChatBot/config -v /path/to/factorio/logfile:/opt/factorio/Factorio-server.log factorio-chat-bot `
