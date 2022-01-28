@@ -134,3 +134,12 @@ Follow the instructions in the output to schedule the service depending on your 
 `[PM2] Init System found: systemd
 [PM2] To setup the Startup Script, copy/paste the following command:
 sudo env PATH=$PATH:/usr/local/bin /usr/local/lib/node_modules/pm2/bin/pm2 startup systemd -u defaultuser --hp /home/defaultuser`
+
+# Running the bot using Docker
+Currently you need to build the container yourself as there is no image on Docker Hub (yet)
+1. `docker build -t factorio-chat-bot .`
+2. `docker run  --name FactorioChatBot --restart=always -d -v /path/to/config:/opt/FactorioChatBot/config -v /path/to/factorio/logfile:/opt/factorio/Factorio-server.log factorio-chat-bot `
+3. `docker start FactorioChatBot`
+
+Or run it interactive (once):
+1. `docker run --rm -it FactorioChatBot -v /path/to/config:/opt/FactorioChatBot/config -v /path/to/factorio/logfile:/opt/factorio/Factorio-server.log`

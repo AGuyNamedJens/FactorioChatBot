@@ -4,7 +4,20 @@ var chokidar = require("chokidar");
 
 var { Rcon } = require("rcon-client");
 
-var config = require("./config.json");
+var config;
+// Check if we have a local config file or a docker volume
+try {
+	if (fs.existsSync("./config/config.json")) {
+		config = require("./config/config.json");
+	} else {
+		console.log("Unable to find config file, see README.md");
+		return;
+	}
+} catch (err) {
+	console.log(err)
+	return;
+}
+
 
 const bot = new Discord.Client({ intents: ['GUILD_MESSAGES', 'GUILDS'], allowedMentions: { users: [], roles: [] } });
 
