@@ -125,3 +125,12 @@ For listing all applications:
 There is a way to view logs, which you can access by running:
 
 `pm2 logs app_name` and `pm2 logs app_name --lines 200` to dig into older logs.
+
+To have the bot automatically start when the server itself reboots, run the following command:
+`pm2 startup`
+
+Follow the instructions in the output to schedule the service depending on your system. For example, on Ubuntu 20.04, the output should look similar to:
+
+`[PM2] Init System found: systemd
+[PM2] To setup the Startup Script, copy/paste the following command:
+sudo env PATH=$PATH:/usr/local/bin /usr/local/lib/node_modules/pm2/bin/pm2 startup systemd -u defaultuser --hp /home/defaultuser`
