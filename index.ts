@@ -283,6 +283,7 @@ function parseMessage(msg: string) {
 
 	var indication = msg.slice(index + 2, indexName);
 	var message: string;
+	var incoming: boolean;
 
 	if (!msg.length && index == 0) return;
 
@@ -294,12 +295,14 @@ function parseMessage(msg: string) {
 			channel.send(":red_circle: | " + msg.slice(index + 2))
 			// Send leave message to the server
 			message = '[color=red]' + msg.slice(index + 2) + '[/color]")';
+			incoming = false;
 			break;
 		case "JOIN":
 			// Send join message to the Discord channel
 			channel.send(":green_circle: | " + msg.slice(index + 2))
 			// Send join message to the server
 			message = '[color=green]' + msg.slice(index + 2) + '[/color]")'
+			incoming = false;
 			break;
 		case "CHAT":
 			if (msg.includes("<server>")) break;
@@ -315,17 +318,22 @@ function parseMessage(msg: string) {
 			}
 			// Send incoming chat from the server to the Discord channel
 			channel.send(":speech_left: | " + newMsg)
+			incoming = true;
 			break;
 		case "WARNING":
 			channel.send(":warning: | " + newMsg);
+			incoming = true;
 			break;
 		default:
 			if (indication == "<server>" || !config.sendServerMessages) break;
 			// Send incoming message from the server, which has no category or user to the Discord console channel
 			channel.send("? | " + msg.slice(index + 1))
+			incoming = true;
 			break;
 	}
 
+	if(!incoming) return;
+	
 	if (config.cleanMessages) {
 		rcon.send('/silent-command game.print(' + message + ')');
 	}
