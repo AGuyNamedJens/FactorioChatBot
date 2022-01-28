@@ -4,8 +4,8 @@ import chokidar from "chokidar";
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
-import { PythonShell } from 'python-shell';
-
+import { PythonShell, PythonShellError } from 'python-shell';
+import { Config, Command } from './types';
 import { Rcon } from "rcon-client";
 
 var config: Config = require("./config.json");
@@ -18,68 +18,13 @@ const Commands: Discord.Collection<string, Command> = new Discord.Collection();
 
 bot.login(config.token);
 
-interface Config {
-	logFile: string;
-
-	chatChannel: string;
-
-	cleanMessages: boolean;
-
-	adminsCanRunCommands: boolean;
-
-	sendServerMessages: boolean;
-
-	logLines: boolean;
-
-	startupMessage: {
-
-		enabled: boolean;
-
-		message: string;
-	}
-
-	factorioPath: string;
-
-	autoCheckUpdates: boolean;
-
-	userToNotify: string;
-
-	checkTime: number;
-
-	silentCheck: boolean;
-
-	RconIP: string;
-
-	RconPort: number;
-
-	RconPassword: string;
-
-	RconTimeout: number;
-
-	token: string;
-
-	autoCheckModUpdates: boolean;
-
-	factorioSettingsPath: string;
-
-	factorioModsPath: string;
-}
-
-interface Command {
-	/**
-	 * The command name.
-	 */
-	data: Omit<SlashCommandBuilder, "addSubcommandGroup" | "addSubcommand">;
-
-	execute(interaction: Discord.CommandInteraction): void;
-}
-
 var rcon: Rcon;
 var tries = 1;
 
 /**
  * Connects to the server via RCON.
  */
+
 function RconConnect() {
 	rcon = new Rcon({ host: config.RconIP, port: config.RconPort, password: config.RconPassword, timeout: config.RconTimeout > 0 ? config.RconTimeout : 2000 });
 
@@ -107,10 +52,10 @@ function RconConnect() {
 
 		if (config.startupMessage.enabled) {
 			if (config.cleanMessages) {
-				rcon.send('/silent-command game.print("[Chat System]: ' + config.startupMessage.message + '")');
+				rcon.send('/silent-command game.print("[Chat System]: ' + config.startupMessage.message + '")').catch(() => {});
 			}
 			else {
-				rcon.send('[Chat System]: ' + config.startupMessage.message);
+				rcon.send('[Chat System]: ' + config.startupMessage.message).catch(() => {});
 			}
 		}
 	});
@@ -137,7 +82,7 @@ async function updateCheck() {
 			return console.log('Auto-retrieval of Factorio package updates has been set to true, but the update script was not found. Did you forget to clone the repository?');
 		}
 	});
-	PythonShell.run('update_factorio.py', { args: ['-d', '-a', config.factorioPath] }, function (_err: PythonShell.Error, results: string[]) {
+	PythonShell.run('update_factorio.py', { args: ['-d', '-a', config.factorioPath] }, function (_err: PythonShellError, results: string[]) {
 		if (results == null) {
 			console.log('Error while checking for updates for the Factorio binary. Ensure the provided path in the config file is set correctly.');
 			return;
@@ -166,7 +111,7 @@ async function modUpdateCheck() {
 		}
 	});
 
-	PythonShell.run('mod_updater.py', { args: ['-s', config.factorioSettingsPath, '-m', config.factorioModsPath, '--fact-path', config.factorioPath, '--list'], }, function (err: PythonShell.Error, results: string[]) {
+	PythonShell.run('mod_updater.py', { args: ['-s', config.factorioSettingsPath, '-m', config.factorioModsPath, '--fact-path', config.factorioPath, '--list'], }, function (err: PythonShellError, results: string[]) {
 		if (results == null) {
 			console.log("Error while checking for mod updates.");
 			return;
@@ -227,7 +172,7 @@ bot.on("ready", () => {
 			.setDescription('Lists online players'),
 		async execute(interaction: Discord.CommandInteraction) {
 			const players = await getOnlinePlayers();
-	
+
 			interaction.reply(`There ${players.length != 1 ? "are" : "is"} currently ${players.length} player${players.length != 1 ? "s" : ""} online${players.length > 0 ? `:\n- \`${players.join("`\n- `")}\`` : "."}`);
 		},
 	})
@@ -235,11 +180,11 @@ bot.on("ready", () => {
 		data: new SlashCommandBuilder()
 			.setName('command')
 			.setDescription('Executes a command on the Factorio server')
-			.addStringOption(option => option.setName('command').setDescription('The command to run on the server').setRequired(true)),
+			.addStringOption((option) => option.setName('command').setDescription('The command to run on the server').setRequired(true)),
 		async execute(interaction: Discord.CommandInteraction) {
 			const comm = interaction.options.getString('command');
 			// send command to the server
-			rcon.send('/' + comm);
+			rcon.send('/' + comm).catch(() => {});
 			// send to the channel showing someone sent a command to the server
 			if (!interaction.memberPermissions.any('ADMINISTRATOR')) {
 				return interaction.reply("You do not have the required permissions to run this command.");
@@ -290,18 +235,18 @@ bot.on("messageCreate", async (message) => {
 		// send to the server
 		if (message.content.length > 0) {
 			if (config.cleanMessages) {
-				rcon.send(`/silent-command game.print("[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content.replaceAll('"', '\\"').replaceAll("'", "\\'")} [/color]${message.attachments?.size > 0 ? ('\n[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}")`);
+				rcon.send(`/silent-command game.print("[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content.replaceAll('"', '\\"').replaceAll("'", "\\'")} [/color]${message.attachments?.size > 0 ? ('\n[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}")`).catch(() => {});
 			}
 			else {
-				rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content.replaceAll('"', '\\"').replaceAll("'", "\\'")}[/color]${message.attachments?.size > 0 ? ('\n[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}`);
+				rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content.replaceAll('"', '\\"').replaceAll("'", "\\'")}[/color]${message.attachments?.size > 0 ? ('\n[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}`).catch(() => {});
 			}
 		}
 		else {
 			if (config.cleanMessages) {
-				rcon.send(`/silent-command game.print("[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: [/color]${message.attachments?.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}")`);
+				rcon.send(`/silent-command game.print("[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: [/color]${message.attachments?.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}")`).catch(() => {});
 			}
 			else {
-				rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: [/color]${message.attachments?.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}`);
+				rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: [/color]${message.attachments?.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}`).catch(() => {});
 			}
 		}
 	}
@@ -337,8 +282,9 @@ function parseMessage(msg: string) {
 	var indexName = msg.indexOf(': ');
 	var newMsg = "`" + msg.slice(index + 2, indexName) + "`" + msg.slice(indexName);
 
-	var indication = msg.slice(index + 2, indexName);
-	var message: string;
+	var indication = msg.slice(msg.indexOf('[')+1, msg.indexOf(']'));
+	var message = '';
+	var incoming = false;
 
 	if (!msg.length && index == 0) return;
 
@@ -371,22 +317,27 @@ function parseMessage(msg: string) {
 			}
 			// Send incoming chat from the server to the Discord channel
 			channel.send(":speech_left: | " + newMsg)
+			incoming = true;
 			break;
 		case "WARNING":
 			channel.send(":warning: | " + newMsg);
+			incoming = true;
 			break;
 		default:
 			if (indication == "<server>" || !config.sendServerMessages) break;
 			// Send incoming message from the server, which has no category or user to the Discord console channel
 			channel.send("? | " + msg.slice(index + 1))
+			incoming = true;
 			break;
 	}
 
+	if(incoming) return;
+	
 	if (config.cleanMessages) {
-		rcon.send('/silent-command game.print(' + message + ')');
+		rcon.send('/silent-command game.print(' + message + ')').catch(() => {});
 	}
 	else {
-		rcon.send(message);
+		rcon.send(message).catch(() => {});
 	}
 }
 
