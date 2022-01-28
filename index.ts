@@ -4,8 +4,8 @@ import chokidar from "chokidar";
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
-import { PythonShell } from 'python-shell';
-
+import { PythonShell, PythonShellError } from 'python-shell';
+import { Config, Command } from './types';
 import { Rcon } from "rcon-client";
 
 var config: Config = require("./config.json");
@@ -17,62 +17,6 @@ const bot = new Discord.Client({ intents: [Intents.FLAGS.GUILD_MESSAGES, Intents
 const Commands: Discord.Collection<string, Command> = new Discord.Collection();
 
 bot.login(config.token);
-
-interface Config {
-	logFile: string;
-
-	chatChannel: string;
-
-	cleanMessages: boolean;
-
-	adminsCanRunCommands: boolean;
-
-	sendServerMessages: boolean;
-
-	logLines: boolean;
-
-	startupMessage: {
-
-		enabled: boolean;
-
-		message: string;
-	}
-
-	factorioPath: string;
-
-	autoCheckUpdates: boolean;
-
-	userToNotify: string;
-
-	checkTime: number;
-
-	silentCheck: boolean;
-
-	RconIP: string;
-
-	RconPort: number;
-
-	RconPassword: string;
-
-	RconTimeout: number;
-
-	token: string;
-
-	autoCheckModUpdates: boolean;
-
-	factorioSettingsPath: string;
-
-	factorioModsPath: string;
-}
-
-interface Command {
-	/**
-	 * The command name.
-	 */
-	data: Omit<SlashCommandBuilder, "addSubcommandGroup" | "addSubcommand">;
-
-	execute(interaction: Discord.CommandInteraction): void;
-}
 
 var rcon: Rcon;
 var tries = 1;
@@ -137,7 +81,7 @@ async function updateCheck() {
 			return console.log('Auto-retrieval of Factorio package updates has been set to true, but the update script was not found. Did you forget to clone the repository?');
 		}
 	});
-	PythonShell.run('update_factorio.py', { args: ['-d', '-a', config.factorioPath] }, function (_err: PythonShell.Error, results: string[]) {
+	PythonShell.run('update_factorio.py', { args: ['-d', '-a', config.factorioPath] }, function (_err: PythonShellError, results: string[]) {
 		if (results == null) {
 			console.log('Error while checking for updates for the Factorio binary. Ensure the provided path in the config file is set correctly.');
 			return;
@@ -166,7 +110,7 @@ async function modUpdateCheck() {
 		}
 	});
 
-	PythonShell.run('mod_updater.py', { args: ['-s', config.factorioSettingsPath, '-m', config.factorioModsPath, '--fact-path', config.factorioPath, '--list'], }, function (err: PythonShell.Error, results: string[]) {
+	PythonShell.run('mod_updater.py', { args: ['-s', config.factorioSettingsPath, '-m', config.factorioModsPath, '--fact-path', config.factorioPath, '--list'], }, function (err: PythonShellError, results: string[]) {
 		if (results == null) {
 			console.log("Error while checking for mod updates.");
 			return;
@@ -227,7 +171,7 @@ bot.on("ready", () => {
 			.setDescription('Lists online players'),
 		async execute(interaction: Discord.CommandInteraction) {
 			const players = await getOnlinePlayers();
-	
+
 			interaction.reply(`There ${players.length != 1 ? "are" : "is"} currently ${players.length} player${players.length != 1 ? "s" : ""} online${players.length > 0 ? `:\n- \`${players.join("`\n- `")}\`` : "."}`);
 		},
 	})
@@ -235,7 +179,7 @@ bot.on("ready", () => {
 		data: new SlashCommandBuilder()
 			.setName('command')
 			.setDescription('Executes a command on the Factorio server')
-			.addStringOption(option => option.setName('command').setDescription('The command to run on the server').setRequired(true)),
+			.addStringOption((option) => option.setName('command').setDescription('The command to run on the server').setRequired(true)),
 		async execute(interaction: Discord.CommandInteraction) {
 			const comm = interaction.options.getString('command');
 			// send command to the server
