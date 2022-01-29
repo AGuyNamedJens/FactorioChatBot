@@ -147,41 +147,63 @@ function parseMessage(msg) {
 	var indexName = msg.indexOf(': ');
 	var newMsg = "`" + msg.slice(index + 2, indexName) + "`" + msg.slice(indexName);
 
-	if (msg.length && index > 1) {
-		var channel = bot.channels.cache.get(config.chatChannel);
-		var consoleChannel = bot.channels.cache.get(config.consoleChannel);
+	var indication = msg.slice(msg.indexOf('[') + 1, msg.indexOf(']'));
+	var message = '';
 
-		if (msg.includes('[LEAVE]')) {
+	if (!msg.length && index == 0) return;
+
+	var channel = bot.channels.cache.get(config.chatChannel);
+	var consoleChannel = bot.channels.cache.get(config.consoleChannel);
+
+	switch (indication) {
+		case "LEAVE":
 			// Send leave message to the Discord channel
-			channel.send(":red_circle: | " + msg.slice(index + 2));
+			channel.send(":red_circle: | " + msg.slice(index + 2))
 			// Send leave message to the server
+			message = '[color=red]' + msg.slice(index + 2) + '[/color]")';
 			if (config.cleanMessages) {
-				rcon.send('/silent-command game.print("[color=red]' + msg.slice(index + 2) + '[/color]")');
+				rcon.send('/silent-command game.print(' + message + ')');
 			}
 			else {
-				rcon.send('[color=red]' + msg.slice(index + 2) + '[/color]');
+				rcon.send(message);
 			}
-		}
-		else if (msg.includes('[JOIN]')) {
+			break;
+		case "JOIN":
 			// Send join message to the Discord channel
-			channel.send(":green_circle: | " + msg.slice(index + 2));
+			channel.send(":green_circle: | " + msg.slice(index + 2))
 			// Send join message to the server
+			message = '[color=green]' + msg.slice(index + 2) + '[/color]")'
 			if (config.cleanMessages) {
-				rcon.send('/silent-command game.print("[color=green]' + msg.slice(index + 2) + '[/color]")');
+				rcon.send('/silent-command game.print(' + message + ')');
 			}
 			else {
-				rcon.send('[color=green]' + msg.slice(index + 2) + '[/color]');
+				rcon.send(message);
 			}
-		}
-		else if (msg.includes("[CHAT]") && !msg.includes("[CHAT] <server>")) {
+			break;
+		case "CHAT":
+			if (msg.includes("<server>")) break;
+			// Check GPS, Train stops and Train locations.
+			if (msg.includes("[gps=") && msg.includes(",") && msg.includes("]")) {
+				newMsg = newMsg.replaceAll("gps=", "Location: ");
+			}
+			if (msg.includes("[train-stop=") && msg.includes(",") && msg.includes("]")) {
+				newMsg = newMsg.replaceAll("train-stop=", "Train stop: ");
+			}
+			if (msg.includes("[train=") && msg.includes("]")) {
+				newMsg = newMsg.replaceAll("train=", "Train: ");
+			}
 			// Send incoming chat from the server to the Discord channel
-			channel.send(":speech_left: | " + newMsg);
-		}
-		else if (!msg.includes("] <server>") && config.consoleChannel !== false) {
+			channel.send(":speech_left: | " + newMsg)
+			break;
+		case "WARNING":
+			channel.send(":warning: | " + newMsg);
+			break;
+		default:
+			if (indication == "<server>" || !config.consoleChannel) break;
 			// Send incoming message from the server, which has no category or user to the Discord console channel
-			consoleChannel.send("? | " + msg);
+			consoleChannel.send("? | " + msg.slice(index + 1))
+			break;
 		}
-	}
 }
 
 /*
