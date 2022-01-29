@@ -230,7 +230,6 @@ bot.on('interactionCreate', async (interaction) => {
 bot.on("messageCreate", async (message) => {
 	if (message.content.length <= 0 && message.attachments.size <= 0) return;
 	if (message.author.bot) return;
-	var channel = (bot.channels.cache.get(config.chatChannel) as Discord.TextChannel);
 
 	if (message.channel.id === config.chatChannel) {
 		// send to the server
@@ -248,7 +247,6 @@ bot.on("messageCreate", async (message) => {
 			}
 			else {
 				rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: [/color]${message.attachments?.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}`);
-				channel.send({ files: message.attachments.map(a => a.url), content: ":speech_left: | (attachments)" });
 			}
 		}
 
