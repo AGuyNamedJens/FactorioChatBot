@@ -41,7 +41,7 @@ function RconConnect() {
 		clearLogFile();
 
 		if (config.startupMessage.enabled) {
-			if (config.cleanMessages == true) {
+			if (config.cleanMessages) {
 				rcon.send('/silent-command game.print("[Chat System]: ' + config.startupMessage.message + '")');
 			} else {
 				rcon.send('[Chat System]: ' + config.startupMessage.message);
@@ -60,23 +60,31 @@ function RconConnect() {
 		console.log(`Socket connection ended! Reconnecting..`)
 		RconConnect();
 	});
-};
+}
 
 /*
 * Bot start event
 */
 
 bot.on("ready", () => {
-	//connect to rcon
+	// Connect to rcon
 	RconConnect();
 
 	console.log('Connected to Discord! Logged in as: ' + bot.user.username + ' - (' + bot.user.id + ')');
-	bot.channels.cache.get(config.chatChannel).send("[Chat System]: Online!")
+	if(config.startupMessage.enabled) bot.channels.cache.get(config.chatChannel).send("[Chat System]: Online!")
 
-	//watch the log file for updates
+	// Watch the log file for updates
 	chokidar.watch(config.logFile, { ignored: /(^|[\/\\])\../ }).on('all', (event, path) => {
 		readLastLine(config.logFile);
 	});
+
+	// Read custom events, logged in factorio's script-output folder
+	if (config.customLogFile !== false) {
+		//watch the custom log file for updates
+		chokidar.watch(config.customLogFile, { ignored: /(^|[\/\\])\../ }).on('all', (event, path) => {
+			readLastLine(config.customLogFile);
+		});
+	}
 });
 
 /*
@@ -89,25 +97,25 @@ bot.on("messageCreate", async (message) => {
 
 	if (message.channel.id === config.chatChannel) {
 		// send to the server
-		if (config.cleanMessages == true) {
-			rcon.send('/silent-command game.print("[color=#7289DA][Discord] ' + message.author.username + ': ' + message.content + '[/color]")');
+		if (config.cleanMessages) {
+			rcon.send(`/silent-command game.print('[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content.replace(/"/g, '\\"').replace(/'/g, "\\'")} [/color]')`);
 		} else {
-			rcon.send('[color=#7289DA][Discord] ' + message.author.username + ': ' + message.content + '[/color]');
+			rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content.replace(/"/g, '\\"').replace(/'/g, "\\'")} [/color]`);
 		}
-		// send to the channel showing someone sent a message to the server and delete their message from the channel
-		message.channel.send(":speech_balloon: | `" + message.author.username + "`: " + message.content);
-		message.delete();
+		// send showing someone sent a message to the server in discord and delete their message from the channel
+		if (config.sentMessages) message.channel.send(":speech_balloon: | `" + message.author.username + "`: " + message.content);
+		if (config.deleteMessages) message.delete();
 
-	} else if (message.channel.id === config.consoleChannel) {
-		// send command to the server
-		rcon.send('/' + message.content);
-		// send to the channel showing someone sent a command to the server
-		message.channel.send("COMMAND RAN | `" + message.author.username + "`: " + message.content);
+		// } else if (message.channel.id === config.consoleChannel) {
+		// 	// send command to the server
+		// 	rcon.send('/' + message.content);
+		// 	// send to the channel showing someone sent a command to the server
+		// 	message.channel.send("COMMAND RAN | `" + message.author.username + "`: " + message.content);
 	} else if (message.content.startsWith(`${config.prefix}online`)) {
 		// Command with the prefix defined in config.js to show online players
 		const players = await getOnlinePlayers();
 		// Send the message to the Discord channel
-		message.channel.send(`There are currently ${players.length} player(s) online${players.length > 0 ? ` with the name(s):\n- \`${players.join("`\n- `")}\`` : "."}`)
+		message.channel.send(`There are currently ${players.length} player(s) online with the name${players.length > 0 ? "(s)" : ""}:\n- \`${players.join("`\n- `")}\`.`);
 	}
 });
 
@@ -139,27 +147,63 @@ function parseMessage(msg) {
 	var indexName = msg.indexOf(': ');
 	var newMsg = "`" + msg.slice(index + 2, indexName) + "`" + msg.slice(indexName);
 
-	if (msg.length && index > 1) {
-		if (msg.slice(1, index).includes("LEAVE")) {
+	var indication = msg.slice(msg.indexOf('[') + 1, msg.indexOf(']'));
+	var message = '';
+
+	if (!msg.length && index == 0) return;
+
+	var channel = bot.channels.cache.get(config.chatChannel);
+	var consoleChannel = bot.channels.cache.get(config.consoleChannel);
+
+	switch (indication) {
+		case "LEAVE":
 			// Send leave message to the Discord channel
-			bot.channels.cache.get(config.chatChannel).send(":red_circle: | " + msg.slice(index + 2))
+			channel.send(":red_circle: | " + msg.slice(index + 2))
 			// Send leave message to the server
-			if (config.cleanMessages == true) rcon.send('/silent-command game.print("[color=red]' + msg.slice(index + 2) + '[/color]")');
-			else rcon.send('[color=red]' + msg.slice(index + 2) + '[/color]');
-		} else if (msg.slice(1, index).includes("JOIN")) {
+			message = '[color=red]' + msg.slice(index + 2) + '[/color]")';
+			if (config.cleanMessages) {
+				rcon.send('/silent-command game.print(' + message + ')');
+			}
+			else {
+				rcon.send(message);
+			}
+			break;
+		case "JOIN":
 			// Send join message to the Discord channel
-			bot.channels.cache.get(config.chatChannel).send(":green_circle: | " + msg.slice(index + 2))
+			channel.send(":green_circle: | " + msg.slice(index + 2))
 			// Send join message to the server
-			if (config.cleanMessages == true) rcon.send('/silent-command game.print("[color=green]' + msg.slice(index + 2) + '[/color]")');
-			else rcon.send('[color=green]' + msg.slice(index + 2) + '[/color]');
-		} else if (msg.slice(1, index).includes("CHAT") && !msg.includes("<server>")) {
+			message = '[color=green]' + msg.slice(index + 2) + '[/color]")'
+			if (config.cleanMessages) {
+				rcon.send('/silent-command game.print(' + message + ')');
+			}
+			else {
+				rcon.send(message);
+			}
+			break;
+		case "CHAT":
+			if (msg.includes("<server>")) break;
+			// Check GPS, Train stops and Train locations.
+			if (msg.includes("[gps=") && msg.includes(",") && msg.includes("]")) {
+				newMsg = newMsg.replaceAll("gps=", "Location: ");
+			}
+			if (msg.includes("[train-stop=") && msg.includes(",") && msg.includes("]")) {
+				newMsg = newMsg.replaceAll("train-stop=", "Train stop: ");
+			}
+			if (msg.includes("[train=") && msg.includes("]")) {
+				newMsg = newMsg.replaceAll("train=", "Train: ");
+			}
 			// Send incoming chat from the server to the Discord channel
-			bot.channels.cache.get(config.chatChannel).send(":speech_left: | " + newMsg)
-		} else if (!msg.includes("<server>") && config.consoleChannel !== false) {
+			channel.send(":speech_left: | " + newMsg)
+			break;
+		case "WARNING":
+			channel.send(":warning: | " + newMsg);
+			break;
+		default:
+			if (indication == "<server>" || !config.consoleChannel) break;
 			// Send incoming message from the server, which has no category or user to the Discord console channel
-			bot.channels.cache.get(config.consoleChannel).send("? | " + msg.slice(index + 1))
+			consoleChannel.send("? | " + msg.slice(index + 1))
+			break;
 		}
-	}
 }
 
 /*
@@ -171,17 +215,18 @@ function readLastLine(path) {
 		//get last line of file. 
 		if (err) throw err;
 		var lines = data.trim().split('\n');
-		lastLine = lines.slice(-1)[0];
+		let lastLine = lines.slice(-1)[0];
+
+		const logs = [config.customLogFile, config.logFile];
 
 		// I should really optimize or completely remove this line
-		if (config.logLines == true) console.log(lastLine);
+		if (config.logLines) console.log(lastLine);
 
-		if (path == config.logFile && lastLine.length > 0) {
+		if (logs.includes(path) && lastLine.length > 0) {
 			// Parse name and message and send it
 			parseMessage(lastLine);
 		}
 	});
-
 
 }
 
@@ -190,6 +235,12 @@ function clearLogFile() {
 	fs.writeFile(config.logFile, "", function () {
 		console.log("Cleared previous chat log");
 	});
+
+	if(console.customLogFile !== false) {
+		fs.writeFile(config.customLogFile, "", function () {
+			console.log("Cleared previous event log");
+		});
+	}
 
 }
 

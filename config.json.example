@@ -1,10 +1,14 @@
 {
     "logFile": "/opt/factorio/Factorio-server.log",
+    "customLogFile": "/opt/factorio/script-output/custom/info_file.txt",
 
     "prefix": "?",
     "chatChannel": "Channel ID",
-    "cleanMessages": false,
     "consoleChannel": false,
+
+    "cleanMessages": false,
+    "deleteMessages": true,
+    "sentMessages": true,
 
     "logLines": false,
 
