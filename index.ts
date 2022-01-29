@@ -52,10 +52,10 @@ function RconConnect() {
 
 		if (config.startupMessage.enabled) {
 			if (config.cleanMessages) {
-				rcon.send('/silent-command game.print("[Chat System]: ' + config.startupMessage.message + '")').catch(() => {});
+				rcon.send('/silent-command game.print("[Chat System]: ' + config.startupMessage.message + '")')
 			}
 			else {
-				rcon.send('[Chat System]: ' + config.startupMessage.message).catch(() => {});
+				rcon.send('[Chat System]: ' + config.startupMessage.message);
 			}
 		}
 	});
@@ -184,7 +184,7 @@ bot.on("ready", () => {
 		async execute(interaction: Discord.CommandInteraction) {
 			const comm = interaction.options.getString('command');
 			// send command to the server
-			rcon.send('/' + comm).catch(() => {});
+			rcon.send('/' + comm);
 			// send to the channel showing someone sent a command to the server
 			if (!interaction.memberPermissions.any('ADMINISTRATOR')) {
 				return interaction.reply("You do not have the required permissions to run this command.");
@@ -230,25 +230,31 @@ bot.on('interactionCreate', async (interaction) => {
 bot.on("messageCreate", async (message) => {
 	if (message.content.length <= 0 && message.attachments.size <= 0) return;
 	if (message.author.bot) return;
+	var channel = (bot.channels.cache.get(config.chatChannel) as Discord.TextChannel);
 
 	if (message.channel.id === config.chatChannel) {
 		// send to the server
 		if (message.content.length > 0) {
 			if (config.cleanMessages) {
-				rcon.send(`/silent-command game.print("[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content.replaceAll('"', '\\"').replaceAll("'", "\\'")} [/color]${message.attachments?.size > 0 ? ('\n[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}")`).catch(() => {});
+				rcon.send(`/silent-command game.print("[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content.replaceAll('"', '\\"').replaceAll("'", "\\'")} [/color]${message.attachments?.size > 0 ? ('\n[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}")`);
 			}
 			else {
-				rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content.replaceAll('"', '\\"').replaceAll("'", "\\'")}[/color]${message.attachments?.size > 0 ? ('\n[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}`).catch(() => {});
+				rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: ${message.content.replaceAll('"', '\\"').replaceAll("'", "\\'")}[/color]${message.attachments?.size > 0 ? ('\n[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}`);
 			}
 		}
 		else {
 			if (config.cleanMessages) {
-				rcon.send(`/silent-command game.print("[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: [/color]${message.attachments?.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}")`).catch(() => {});
+				rcon.send(`/silent-command game.print("[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: [/color]${message.attachments?.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}")`);
 			}
 			else {
-				rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: [/color]${message.attachments?.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}`).catch(() => {});
+				rcon.send(`[color=#7289DA][Discord] ${message.member.nickname ?? message.author.username}: [/color]${message.attachments?.size > 0 ? ('[' + message.attachments.size + ' attachment' + (message.attachments.size != 1 ? 's' : '')) + ']' : ''}`);
+				channel.send({ files: message.attachments.map(a => a.url), content: ":speech_left: | (attachments)" });
 			}
 		}
+
+		// send showing someone sent a message to the server in discord and delete their message from the channel
+		if (config.sentMessages) message.channel.send({ content: ":speech_balloon: | `" + message.author.username + "`: " + message.content.replaceAll('"', '\\"').replaceAll("'", "\\'"), files: message.attachments.size > 0 ? message.attachments.map(a => a.url) : [] });
+		if (config.deleteMessages) message.delete();
 	}
 });
 
@@ -282,9 +288,8 @@ function parseMessage(msg: string) {
 	var indexName = msg.indexOf(': ');
 	var newMsg = "`" + msg.slice(index + 2, indexName) + "`" + msg.slice(indexName);
 
-	var indication = msg.slice(msg.indexOf('[')+1, msg.indexOf(']'));
+	var indication = msg.slice(msg.indexOf('[') + 1, msg.indexOf(']'));
 	var message = '';
-	var incoming = false;
 
 	if (!msg.length && index == 0) return;
 
@@ -296,12 +301,24 @@ function parseMessage(msg: string) {
 			channel.send(":red_circle: | " + msg.slice(index + 2))
 			// Send leave message to the server
 			message = '[color=red]' + msg.slice(index + 2) + '[/color]")';
+			if (config.cleanMessages) {
+				rcon.send('/silent-command game.print(' + message + ')');
+			}
+			else {
+				rcon.send(message);
+			}
 			break;
 		case "JOIN":
 			// Send join message to the Discord channel
 			channel.send(":green_circle: | " + msg.slice(index + 2))
 			// Send join message to the server
 			message = '[color=green]' + msg.slice(index + 2) + '[/color]")'
+			if (config.cleanMessages) {
+				rcon.send('/silent-command game.print(' + message + ')');
+			}
+			else {
+				rcon.send(message);
+			}
 			break;
 		case "CHAT":
 			if (msg.includes("<server>")) break;
@@ -317,27 +334,15 @@ function parseMessage(msg: string) {
 			}
 			// Send incoming chat from the server to the Discord channel
 			channel.send(":speech_left: | " + newMsg)
-			incoming = true;
 			break;
 		case "WARNING":
 			channel.send(":warning: | " + newMsg);
-			incoming = true;
 			break;
 		default:
 			if (indication == "<server>" || !config.sendServerMessages) break;
 			// Send incoming message from the server, which has no category or user to the Discord console channel
 			channel.send("? | " + msg.slice(index + 1))
-			incoming = true;
 			break;
-	}
-
-	if(incoming) return;
-	
-	if (config.cleanMessages) {
-		rcon.send('/silent-command game.print(' + message + ')').catch(() => {});
-	}
-	else {
-		rcon.send(message).catch(() => {});
 	}
 }
 
