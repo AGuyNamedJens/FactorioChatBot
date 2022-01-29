@@ -2,8 +2,6 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import Discord from "discord.js";
 
 interface Config {
-	sentMessages: any;
-	deleteMessages: any;
 	logFile: string;
 
 	chatChannel: string;
@@ -13,6 +11,10 @@ interface Config {
 	adminsCanRunCommands: boolean;
 
 	sendServerMessages: boolean;
+
+	sentMessages: boolean;
+	
+	deleteMessages: boolean;
 
 	logLines: boolean;
 
